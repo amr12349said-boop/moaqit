@@ -1,4 +1,4 @@
-const CACHE = 'moaqit-v4';
+const CACHE = 'moaqit-v5';
 const ASSETS = [
   './', './index.html', './world.js', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './icon-maskable-512.png',
@@ -18,6 +18,10 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
+  const url = req.url.split('?')[0];
+  /* ملفات التحميل الكبيرة: تسيب المتصفح يتعامل معاها مباشرة
+     عشان يدعم إكمال التحميل (Range) ولا يتقطع */
+  if (/\.(apk|zip|7z|rar)$/i.test(url)) return;
   const accept = req.headers.get('accept') || '';
   const isDoc = req.mode === 'navigate' || accept.indexOf('text/html') !== -1;
   if (isDoc){
