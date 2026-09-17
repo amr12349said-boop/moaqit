@@ -33,7 +33,8 @@ public class Notify {
             NotificationChannel n = new NotificationChannel(
                     CH_ALERTS, c.getString(R.string.ch_alerts), NotificationManager.IMPORTANCE_HIGH);
             n.setDescription("تنبيه قبل الصلاة وبوقت الأذان");
-            n.enableVibration(true);
+            n.enableVibration(false);
+            try { n.setVibrationPattern(new long[]{0L}); } catch (Exception e) { }
             try {
                 n.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION), null);
             } catch (Exception e) { }

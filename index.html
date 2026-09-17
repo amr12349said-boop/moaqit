@@ -300,6 +300,37 @@ section.active{display:block}
 }
 .preset:hover,.preset.sel{border-color:var(--gold);color:var(--gold2);background:rgba(212,175,55,.1)}
 .timer-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.timer-bar{display:none;width:100%;max-width:520px;height:10px;border-radius:99px;background:var(--track);overflow:hidden;margin:4px 0 14px}
+.timer-bar-fill{height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .15s linear}
+
+/* ===== Timer view styles ===== */
+#tab-timer.tv-big .timer-ring{display:none}
+#tab-timer.tv-big .timer-bar{display:block}
+#tab-timer.tv-big .timer-display{
+  position:static;width:100%;max-width:520px;padding:24px 18px 20px;gap:6px;
+  background:linear-gradient(160deg,rgba(212,175,55,.18),rgba(212,175,55,.03));
+  border:1px solid var(--card-border);border-radius:22px;
+}
+#tab-timer.tv-big .timer-display .t{font-size:clamp(2.6rem,13vw,4.4rem);letter-spacing:3px}
+#tab-timer.tv-big .timer-display .st{font-size:.95rem}
+
+#tab-timer.tv-bar .timer-ring{display:none}
+#tab-timer.tv-bar .timer-bar{display:block;height:14px;max-width:560px;margin:0 0 18px}
+#tab-timer.tv-bar .timer-display{position:static;width:100%;max-width:560px;padding:0 0 4px}
+#tab-timer.tv-bar .timer-display .t{font-size:clamp(2.2rem,11vw,3.6rem)}
+
+#tab-timer.tv-compact .timer-ring{display:none}
+#tab-timer.tv-compact .timer-display{position:static;width:100%;padding:8px 0 2px}
+#tab-timer.tv-compact .timer-display .t{font-size:2.1rem}
+#tab-timer.tv-compact .timer-display .st{font-size:.78rem}
+#tab-timer.tv-compact .time-set{margin:10px 0 6px}
+#tab-timer.tv-compact .val-box{width:70px;padding:6px 3px}
+#tab-timer.tv-compact .val-box input{font-size:1.35rem}
+#tab-timer.tv-compact .val-box label{font-size:.65rem}
+#tab-timer.tv-compact .step-btn{width:52px;height:26px}
+#tab-timer.tv-compact .sep{font-size:1.4rem;margin-top:18px}
+#tab-timer.tv-compact .timer-presets{margin:8px 0 12px}
+#tab-timer.tv-compact .preset{padding:5px 12px;font-size:.78rem}
 
 /* ===== Stopwatch ===== */
 .sw-display{text-align:center;font-size:clamp(2.8rem,10vw,4.4rem);font-weight:900;color:var(--gold2);
@@ -664,7 +695,9 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
   <section id="tab-timer">
     <div class="card">
       <h2>المؤقت التنازلي <span class="line"></span></h2>
+      <div class="region-chips" id="timer-styles" style="justify-content:center;margin-bottom:16px"></div>
       <div class="timer-main">
+        <div class="timer-bar"><div class="timer-bar-fill" id="timer-bar-fill"></div></div>
         <div class="timer-ring">
           <svg width="280" height="280" viewBox="0 0 280 280">
             <defs>
@@ -1523,7 +1556,7 @@ function removeCustomSound(){
 }
 
 /* ==================== الرنين والنوافذ ==================== */
-let ringing = null, vibrateTimer = null, docTitle = document.title;
+let ringing = null, docTitle = document.title;
 function startRinging(type, title, sub, soundKey){
   if (ringing) stopRinging(true);
   initAudio();
@@ -1536,7 +1569,6 @@ function startRinging(type, title, sub, soundKey){
   const key = (s === 'custom' && customSound) ? 'custom' : (SOUNDS[s] ? s : 'azan');
   if (type === 'prayer' && s === 'userazan'){ playAzanFile(true); }
   else ringSound(key, true);
-  if (type !== 'prayer' && navigator.vibrate) vibrateTimer = setInterval(() => navigator.vibrate([400,200,400]), 2000);
   try {
     if ('Notification' in window && Notification.permission === 'granted'){
       const n = new Notification('⏰ ' + title, { body: sub + ' • اضغط لفتح الرنة', tag: 'moaqit-alarm', requireInteraction: true });
@@ -1571,8 +1603,6 @@ document.addEventListener('visibilitychange', () => {
   if (!document.hidden && ringing) ringFullscreen();
 });
 function stopRinging(clear){
-  if (vibrateTimer) { clearInterval(vibrateTimer); vibrateTimer = null; }
-  if (navigator.vibrate) navigator.vibrate(0);
   stopMelody();
   stopCustomAudio();
   stopAzanAudio();
@@ -1754,6 +1784,41 @@ $('#time-set').addEventListener('click', e => {
   });
   el.addEventListener('input', () => { clampRange(id); previewTimer(); });
 });
+const TIMER_STYLES = [['ring','دائري'],['big','رقمي كبير'],['bar','شريط'],['compact','مبسّط']];
+let tStyle = 'ring';
+function buildTimerStyleChips(){
+  const wrap = $('#timer-styles');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  TIMER_STYLES.forEach(s => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (s[0] === tStyle ? ' sel' : '');
+    b.dataset.s = s[0];
+    b.textContent = s[1];
+    wrap.appendChild(b);
+  });
+}
+function applyTimerStyle(){
+  const el = $('#tab-timer');
+  if (el){
+    el.classList.remove('tv-ring','tv-big','tv-bar','tv-compact');
+    el.classList.add('tv-' + tStyle);
+  }
+  $$('#timer-styles .chip').forEach(c => c.classList.toggle('sel', c.dataset.s === tStyle));
+}
+function initTimerStyle(){
+  const saved = localStorage.getItem('moaqit_tstyle');
+  tStyle = TIMER_STYLES.some(s => s[0] === saved) ? saved : 'ring';
+  buildTimerStyleChips();
+  applyTimerStyle();
+}
+$('#timer-styles').addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  tStyle = chip.dataset.s;
+  localStorage.setItem('moaqit_tstyle', tStyle);
+  applyTimerStyle();
+});
 function timerDisplay(ms){
   ms = Math.max(0, Math.ceil(ms/1000));
   const h = Math.floor(ms/3600), m = Math.floor(ms%3600/60), s = ms%60;
@@ -1761,6 +1826,8 @@ function timerDisplay(ms){
   setAnimated($('#timer-display'), fmt(h) + ':' + fmt(m) + ':' + fmt(s));
   const prog = timerTotal ? 1 - (ms / (timerTotal/1000)) : 0;
   $('#timer-progress').style.strokeDashoffset = CIRC * prog;
+  const bar = $('#timer-bar-fill');
+  if (bar) bar.style.width = Math.max(0, Math.min(1, prog)) * 100 + '%';
 }
 function timerTick(){
   if (timerPaused) return;
@@ -2053,7 +2120,7 @@ const METHODS = [
   {id:'hanafi', name:'أم القرى (عصر حنفي)', fajr:18.5, isha:null, ishaMin:90, asr:2}
 ];
 
-let pMode = 'city', pCity = PRAYER_CITIES[0], pLat = 21.3891, pLon = 39.8579, pMethod = 'ummalqura', pAzan = true, pGeoLabel = '', pGeoIana = '', pAutoTried = false, pStyle = 'timeline';
+let pMode = 'city', pCity = PRAYER_CITIES[6], pLat = 31.2001, pLon = 29.9187, pMethod = 'egypt', pAzan = true, pGeoLabel = '', pGeoIana = 'Africa/Cairo', pAutoTried = false, pStyle = 'timeline';
 const PRAYER_STYLES = [['hero','فخم'],['cards','بطاقات'],['timeline','خط زمني'],['compact','مبسّط']];
 function buildStyleChips(){
   const wrap = $('#prayer-styles');
@@ -2202,10 +2269,11 @@ function reverseGeocode(lat, lon, fallbackLabel){
     });
 }
 const METHOD_BY_COUNTRY = {EG:'egypt', SD:'egypt', SA:'ummalqura', AE:'dubai', KW:'ummalqura', QA:'ummalqura', BH:'ummalqura', OM:'ummalqura', YE:'ummalqura', PK:'karachi', IN:'karachi', BD:'karachi', AF:'karachi', US:'isna', CA:'isna'};
-function methodForCountry(cc){
+const COUNTRY_CC = {'مصر':'EG','السودان':'SD','السعودية':'SA','الإمارات':'AE','قطر':'QA','الكويت':'KW','البحرين':'BH','عُمان':'OM','اليمن':'YE','باكستان':'PK','الهند':'IN','بنغلاديش':'BD','الولايات المتحدة':'US','كندا':'CA'};
+function methodForCountry(cc, useFallback){
   if (!cc) return;
   if (localStorage.getItem('moaqit_method_user') === '1') return;
-  const m = METHOD_BY_COUNTRY[String(cc).toUpperCase()];
+  const m = METHOD_BY_COUNTRY[String(cc).toUpperCase()] || (useFallback ? 'mwl' : '');
   if (m && METHODS.some(x => x.id === m)) pMethod = m;
 }
 function validIana(tz){
@@ -2409,7 +2477,9 @@ $('#prayer-city').addEventListener('change', e => {
   if (e.target.value === '') return;
   const c = PRAYER_CITIES[+e.target.value];
   pMode = 'city'; pCity = c; pLat = c.lat; pLon = c.lon;
-  savePrayer(); computePrayer(); renderPrayer();
+  pGeoIana = validIana(c.tz) || pGeoIana;
+  methodForCountry(COUNTRY_CC[c.country] || '', true);
+  savePrayer(); buildMethods(); computePrayer(); renderPrayer(); updateLocStatus();
   toast('مواقيت الصلاة لـ ' + c.city);
 });
 $('#prayer-gps').addEventListener('click', () => {
@@ -2586,6 +2656,7 @@ ensureNotify();
 applyTheme(localStorage.getItem('moaqit_theme') === 'light' ? 'light' : 'dark');
 initCityClock();
 initPrayer();
+initTimerStyle();
 loadAlarms();
 buildTicks();
 buildSounds();
@@ -3166,7 +3237,7 @@ const MAWAQIT_ADHAN = (function(){
     else if (type === 'city') out = {ok:true, city:setCity(m.id)};
     else if (type === 'method') out = {ok:true, method:setMethod(m.id)};
     else if (type === 'sync' || type === 'get' || type === 'snapshot') out = snapshot();
-    else if (type === 'flash' || type === 'wake'){ try { if (navigator.vibrate) navigator.vibrate([400,200,400]); } catch(e){} out = {ok:true}; }
+    else if (type === 'flash' || type === 'wake') out = {ok:true};
     else if (type === 'tab'){ try { goTab(Number(m.n) || 1); out = {ok:true}; } catch(e){ out = {ok:false}; } }
     else out = {ok:false, error:'unknown: ' + type};
     const reply = Object.assign({type:'reply', replyTo:type, source:'mawaqit'}, out);
