@@ -103,16 +103,16 @@ public class MainActivity extends Activity {
 
             @Override
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
-                if (this.filePathCallback != null) {
-                    this.filePathCallback.onReceiveValue(null);
+                if (MainActivity.this.filePathCallback != null) {
+                    MainActivity.this.filePathCallback.onReceiveValue(null);
                 }
-                this.filePathCallback = filePathCallback;
+                MainActivity.this.filePathCallback = filePathCallback;
                 try {
                     startActivityForResult(fileChooserParams.createIntent(), REQ_FILE);
                 } catch (Exception e) {
-                    if (this.filePathCallback != null) {
-                        this.filePathCallback.onReceiveValue(null);
-                        this.filePathCallback = null;
+                    if (MainActivity.this.filePathCallback != null) {
+                        MainActivity.this.filePathCallback.onReceiveValue(null);
+                        MainActivity.this.filePathCallback = null;
                     }
                     return false;
                 }
