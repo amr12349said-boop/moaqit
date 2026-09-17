@@ -595,7 +595,7 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         إضافة صوت من جهازك
       </button>
-      <input type="file" id="custom-file" accept="audio/*" style="display:none">
+      <input type="file" id="custom-file" accept="audio/*,.mp3,.wav,.ogg,.oga,.m4a,.aac,.flac,.opus,.webm,.3gp,.amr" style="display:none">
       <div class="sound-hint">الملفات الكبيرة تُقتص تلقائياً: تأخذ 30 ثانية من منتصف الصوت</div>
       <div class="vol-row">
         <span class="vol-label">مستوى الصوت</span>
@@ -2064,12 +2064,13 @@ function prayerNowMin(){
   return hh*60 + mm;
 }
 const PRAYER_ORDER = [['fajr','الفجر'],['sunrise','الشروق'],['dhuhr','الظهر'],['asr','العصر'],['maghrib','المغرب'],['isha','العشاء']];
+const PRAYER_FARD = [['fajr','الفجر'],['dhuhr','الظهر'],['asr','العصر'],['maghrib','المغرب'],['isha','العشاء']];
 function nextPrayerInfo(){
   computePrayer();
   const nowMin = prayerNowMin();
-  for (let i = 0; i < PRAYER_ORDER.length; i++){
-    const tm = prayerTimes[PRAYER_ORDER[i][0]];
-    if (tm > nowMin) return {key: PRAYER_ORDER[i][0], name: PRAYER_ORDER[i][1], remaining: tm - nowMin, time: tm};
+  for (let i = 0; i < PRAYER_FARD.length; i++){
+    const tm = prayerTimes[PRAYER_FARD[i][0]];
+    if (tm > nowMin) return {key: PRAYER_FARD[i][0], name: PRAYER_FARD[i][1], remaining: tm - nowMin, time: tm};
   }
   const {y, m, d} = localDateParts(new Date(Date.now() + 86400000), pTZ());
   const meth = METHODS.find(x => x.id === pMethod) || METHODS[0];
@@ -2288,7 +2289,9 @@ function ipLocate(done, fail){
   const providers = [
     {url:'https://ipapi.co/json/', lat:'latitude', lon:'longitude'},
     {url:'https://ipwho.is/', lat:'latitude', lon:'longitude'},
-    {url:'https://ipinfo.io/json', lat:'loc', lon:'loc'}
+    {url:'https://ipinfo.io/json', lat:'loc', lon:'loc'},
+    {url:'http://ip-api.com/json/', lat:'lat', lon:'lon'},
+    {url:'https://api.bigdatacloud.net/data/client-ip-with-confidence', lat:'latitude', lon:'longitude'}
   ];
   let i = 0;
   const tryNext = () => {
@@ -2690,8 +2693,8 @@ function initShare(){
     if (typeof pLabel === 'function') txt += ' • ' + pLabel();
     txt += '\n';
     PRAYER_ORDER.forEach(p => {
-      const t = (typeof times !== 'undefined' && times && times[p] != null) ? minToStr(times[p]) : '--:--';
-      const nm = (typeof PRAYER_NAMES !== 'undefined' && PRAYER_NAMES[p]) ? PRAYER_NAMES[p] : p;
+      const t = (typeof prayerTimes !== 'undefined' && prayerTimes && prayerTimes[p[0]] != null) ? minToStr(prayerTimes[p[0]]) : '--:--';
+      const nm = p[1];
       txt += '▪ ' + nm + ': ' + t + '\n';
     });
     if (navigator.share){

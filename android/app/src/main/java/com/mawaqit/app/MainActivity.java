@@ -27,6 +27,7 @@ public class MainActivity extends Activity {
     private static final String HOME = "https://appassets.androidplatform.net/assets/index.html";
     private static final int REQ_NOTIF = 101;
     private static final int REQ_LOC = 102;
+    private static final int REQ_FILE = 103;
 
     private static final String JS_CURRENT_TAB =
             "(function(){try{var t=document.querySelectorAll('.tab');for(var i=0;i<t.length;i++){" +
@@ -36,6 +37,7 @@ public class MainActivity extends Activity {
     private WebViewAssetLoader loader;
     private GeolocationPermissions.Callback geoCallback;
     private String geoOrigin;
+    private ValueCallback<Uri[]> filePathCallback;
 
     @Override
     protected void onCreate(Bundle state) {
@@ -98,6 +100,24 @@ public class MainActivity extends Activity {
                             Manifest.permission.ACCESS_COARSE_LOCATION}, REQ_LOC);
                 }
             }
+
+            @Override
+            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
+                if (this.filePathCallback != null) {
+                    this.filePathCallback.onReceiveValue(null);
+                }
+                this.filePathCallback = filePathCallback;
+                try {
+                    startActivityForResult(fileChooserParams.createIntent(), REQ_FILE);
+                } catch (Exception e) {
+                    if (this.filePathCallback != null) {
+                        this.filePathCallback.onReceiveValue(null);
+                        this.filePathCallback = null;
+                    }
+                    return false;
+                }
+                return true;
+            }
         });
 
         web.addJavascriptInterface(new Bridge(), "AndroidAdhan");
@@ -134,6 +154,29 @@ public class MainActivity extends Activity {
             geoCallback = null;
             geoOrigin = null;
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQ_FILE) {
+            if (filePathCallback == null) return;
+            Uri[] results = null;
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                if (data.getData() != null) {
+                    results = new Uri[]{data.getData()};
+                } else if (data.getClipData() != null && data.getClipData().getItemCount() > 0) {
+                    int count = data.getClipData().getItemCount();
+                    results = new Uri[count];
+                    for (int i = 0; i < count; i++) {
+                        results[i] = data.getClipData().getItemAt(i).getUri();
+                    }
+                }
+            }
+            filePathCallback.onReceiveValue(results);
+            filePathCallback = null;
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

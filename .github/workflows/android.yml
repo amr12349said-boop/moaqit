@@ -5,6 +5,10 @@ on:
     paths:
       - 'android/**'
       - '.github/workflows/android.yml'
+      - 'index.html'
+      - 'sw.js'
+      - 'world.js'
+      - 'manifest.webmanifest'
   workflow_dispatch:
 
 permissions:
