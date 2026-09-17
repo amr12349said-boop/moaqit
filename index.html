@@ -304,33 +304,125 @@ section.active{display:block}
 .timer-bar-fill{height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .15s linear}
 
 /* ===== Timer view styles ===== */
-#tab-timer.tv-big .timer-ring{display:none}
-#tab-timer.tv-big .timer-bar{display:block}
-#tab-timer.tv-big .timer-display{
-  position:static;width:100%;max-width:520px;padding:24px 18px 20px;gap:6px;
-  background:linear-gradient(160deg,rgba(212,175,55,.18),rgba(212,175,55,.03));
-  border:1px solid var(--card-border);border-radius:22px;
+.preset.study-only,.study-panel{display:none}
+@keyframes tvShimmer{0%{background-position:130% 0}100%{background-position:-130% 0}}
+@keyframes tvPulse{0%,100%{filter:drop-shadow(0 0 10px rgba(245,215,142,.35))}50%{filter:drop-shadow(0 0 26px rgba(245,215,142,.85))}}
+@keyframes tvDrift{0%{transform:translate3d(0,0,0) scale(1)}33%{transform:translate3d(6%,-4%,0) scale(1.1)}66%{transform:translate3d(-5%,5%,0) scale(.94)}100%{transform:translate3d(0,0,0) scale(1)}}
+@keyframes tvFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes tvRise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes tvBlink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* 1) ملكي */
+#tab-timer.tv-royale .timer-main{
+  position:relative;width:100%;max-width:600px;padding:26px 18px 22px;
+  background:
+    radial-gradient(120% 90% at 50% -20%,rgba(212,175,55,.20),transparent 60%),
+    linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.012));
+  border:1px solid rgba(212,175,55,.45);border-radius:30px;
+  box-shadow:0 0 0 1px rgba(212,175,55,.10),0 20px 60px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.08);
 }
-#tab-timer.tv-big .timer-display .t{font-size:clamp(2.6rem,13vw,4.4rem);letter-spacing:3px}
-#tab-timer.tv-big .timer-display .st{font-size:.95rem}
+#tab-timer.tv-royale .timer-ring{width:308px;height:308px}
+#tab-timer.tv-royale .timer-ring svg{width:100%;height:100%}
+#tab-timer.tv-royale .timer-ring circle.bg{stroke:rgba(212,175,55,.40);stroke-width:2.5;stroke-dasharray:1.5 10;stroke-linecap:round}
+#tab-timer.tv-royale .timer-ring circle.fg{stroke-width:9;filter:drop-shadow(0 0 9px rgba(245,215,142,.6))}
+#tab-timer.tv-royale .timer-display .t{
+  font-size:clamp(2.7rem,13vw,3.9rem);letter-spacing:2px;
+  background:linear-gradient(100deg,#b9852f 0%,#f5d78e 22%,#fffaf0 34%,#f5d78e 46%,#b9852f 64%);
+  background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:tvShimmer 4s linear infinite;
+}
+#tab-timer.tv-royale .timer-display .st{letter-spacing:3px;color:var(--gold)}
+#tab-timer.tv-royale .timer-ring{animation:tvPulse 3s ease-in-out infinite}
 
-#tab-timer.tv-bar .timer-ring{display:none}
-#tab-timer.tv-bar .timer-bar{display:block;height:14px;max-width:560px;margin:0 0 18px}
-#tab-timer.tv-bar .timer-display{position:static;width:100%;max-width:560px;padding:0 0 4px}
-#tab-timer.tv-bar .timer-display .t{font-size:clamp(2.2rem,11vw,3.6rem)}
+/* 2) أورورا */
+#tab-timer.tv-aurora .timer-main{
+  position:relative;overflow:hidden;width:100%;max-width:580px;padding:30px 20px 24px;
+  border:1px solid rgba(255,255,255,.14);border-radius:30px;
+  background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.015));
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  box-shadow:0 24px 70px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.12);
+}
+#tab-timer.tv-aurora .timer-main::before,
+#tab-timer.tv-aurora .timer-main::after{
+  content:'';position:absolute;width:340px;height:340px;border-radius:50%;
+  filter:blur(60px);opacity:.55;z-index:0;pointer-events:none;
+}
+#tab-timer.tv-aurora .timer-main::before{background:radial-gradient(circle,#e0b45a,transparent 65%);top:-120px;right:-90px;animation:tvDrift 14s ease-in-out infinite}
+#tab-timer.tv-aurora .timer-main::after{background:radial-gradient(circle,#4f7cff,transparent 65%);bottom:-130px;left:-100px;animation:tvDrift 18s ease-in-out infinite reverse}
+#tab-timer.tv-aurora .timer-main>*{position:relative;z-index:1}
+#tab-timer.tv-aurora .timer-ring{width:296px;height:296px}
+#tab-timer.tv-aurora .timer-ring svg{width:100%;height:100%}
+#tab-timer.tv-aurora .timer-ring circle.bg{stroke:rgba(255,255,255,.10)}
+#tab-timer.tv-aurora .timer-ring circle.fg{stroke-width:11;filter:drop-shadow(0 0 14px rgba(245,215,142,.75))}
+#tab-timer.tv-aurora .timer-display{animation:tvFloat 5s ease-in-out infinite}
+#tab-timer.tv-aurora .timer-display .t{font-size:clamp(2.7rem,13vw,3.9rem);letter-spacing:2px;color:#fffaf0;text-shadow:0 0 22px rgba(224,180,90,.55)}
+#tab-timer.tv-aurora .timer-display .st{letter-spacing:3px}
 
-#tab-timer.tv-compact .timer-ring{display:none}
-#tab-timer.tv-compact .timer-display{position:static;width:100%;padding:8px 0 2px}
-#tab-timer.tv-compact .timer-display .t{font-size:2.1rem}
-#tab-timer.tv-compact .timer-display .st{font-size:.78rem}
-#tab-timer.tv-compact .time-set{margin:10px 0 6px}
-#tab-timer.tv-compact .val-box{width:70px;padding:6px 3px}
-#tab-timer.tv-compact .val-box input{font-size:1.35rem}
-#tab-timer.tv-compact .val-box label{font-size:.65rem}
-#tab-timer.tv-compact .step-btn{width:52px;height:26px}
-#tab-timer.tv-compact .sep{font-size:1.4rem;margin-top:18px}
-#tab-timer.tv-compact .timer-presets{margin:8px 0 12px}
-#tab-timer.tv-compact .preset{padding:5px 12px;font-size:.78rem}
+/* 3) مذكرة (بومودورو) */
+#tab-timer.tv-notebook .timer-main{
+  position:relative;width:100%;max-width:600px;padding:30px 26px 24px;border-radius:22px;color:#3a2f1e;
+  background:
+    linear-gradient(270deg,transparent 0 34px,rgba(214,90,90,.55) 34px 36px,transparent 36px),
+    repeating-linear-gradient(180deg,transparent 0 33px,rgba(120,90,50,.16) 33px 34px),
+    linear-gradient(160deg,#fffdf5,#f3ead6);
+  border:1px solid rgba(120,90,50,.35);
+  box-shadow:0 22px 55px rgba(0,0,0,.5),inset 0 0 60px rgba(120,90,50,.08);
+}
+#tab-timer.tv-notebook .timer-ring{display:block;width:100%;height:auto}
+#tab-timer.tv-notebook .timer-ring svg{display:none}
+#tab-timer.tv-notebook .timer-bar{display:block;height:10px;margin:0 0 18px;background:rgba(120,90,50,.15)}
+#tab-timer.tv-notebook .timer-bar-fill{background:linear-gradient(90deg,#b4522e,#d98b5f)}
+#tab-timer.tv-notebook .timer-display{position:static;width:100%;padding:0}
+#tab-timer.tv-notebook .timer-display .t{font-size:clamp(3rem,15vw,4.6rem);letter-spacing:2px;color:#2f2517;text-shadow:0 1px 0 rgba(255,255,255,.65)}
+#tab-timer.tv-notebook .timer-display .st{color:#7a6446;letter-spacing:1px}
+#tab-timer.tv-notebook .study-panel{display:block;margin-top:18px;text-align:center;animation:tvRise .4s ease}
+#tab-timer.tv-notebook .study-quote{
+  display:inline-block;max-width:94%;font-size:.95rem;font-weight:800;color:#5b4413;line-height:1.9;
+  padding:14px 18px;border-radius:6px 16px 6px 16px;
+  background:linear-gradient(160deg,#fff6b8,#ffe884);
+  box-shadow:0 10px 20px rgba(120,90,50,.28);transform:rotate(-1.4deg);
+}
+#tab-timer.tv-notebook .study-quote::before{content:'📌 '}
+#tab-timer.tv-notebook .study-meta{display:flex;justify-content:center;gap:8px;margin-top:14px;flex-wrap:wrap}
+#tab-timer.tv-notebook .study-chip{
+  font-size:.75rem;font-weight:800;color:#6b5638;
+  background:rgba(120,90,50,.10);border:1px solid rgba(120,90,50,.30);border-radius:999px;padding:5px 13px;
+}
+#tab-timer.tv-notebook .study-chip b{color:#b4522e}
+#tab-timer.tv-notebook .study-dots{display:flex;gap:7px;justify-content:center;margin-top:13px}
+#tab-timer.tv-notebook .study-dots span{width:12px;height:12px;border-radius:50%;border:2px solid #b4522e;background:transparent;transition:.25s}
+#tab-timer.tv-notebook .study-dots span.on{background:#b4522e;box-shadow:0 0 8px rgba(180,82,46,.6)}
+#tab-timer.tv-notebook .preset:not(.study-only){display:none}
+#tab-timer.tv-notebook .preset.study-only{display:inline-block;background:rgba(120,90,50,.08);border-color:rgba(120,90,50,.35);color:#5b4413}
+#tab-timer.tv-notebook .preset.study-only[data-phase="study"]{background:#b4522e;border-color:#b4522e;color:#fff}
+#tab-timer.tv-notebook .preset.study-only[data-phase="break"]{background:#2f8f63;border-color:#2f8f63;color:#fff}
+#tab-timer.tv-notebook .preset.study-only[data-phase="long"]{background:#3a6fb0;border-color:#3a6fb0;color:#fff}
+#tab-timer.tv-notebook .time-set{display:none}
+
+/* 4) فليب */
+#tab-timer.tv-flip .timer-ring{display:block;width:100%;height:auto}
+#tab-timer.tv-flip .timer-ring svg{display:none}
+#tab-timer.tv-flip .timer-bar{display:block;height:8px;max-width:600px;margin:0 0 22px;background:rgba(255,255,255,.05)}
+#tab-timer.tv-flip .timer-bar-fill{background:linear-gradient(90deg,#8a6a24,#f5d78e,#8a6a24)}
+#tab-timer.tv-flip .timer-display{position:static;width:100%;padding:4px 0 2px}
+#tab-timer.tv-flip .timer-display .t{display:block;background:none;color:#f5d78e;letter-spacing:0}
+#tab-timer.tv-flip .flip-wrap{display:flex;align-items:center;justify-content:center;gap:7px}
+#tab-timer.tv-flip .flip-unit{display:inline-flex;gap:5px}
+#tab-timer.tv-flip .flip-digit{
+  display:flex;align-items:center;justify-content:center;
+  width:clamp(36px,10.5vw,62px);height:clamp(54px,15vw,90px);border-radius:13px;
+  font-size:clamp(1.9rem,9.5vw,3.1rem);font-weight:900;font-variant-numeric:tabular-nums;color:#f5d78e;
+  background:linear-gradient(180deg,#1b2338 0%,#111827 49%,#0b1020 51%,#141c2f 100%);
+  border:1px solid rgba(212,175,55,.22);
+  box-shadow:0 10px 24px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08);
+  position:relative;overflow:hidden;
+}
+#tab-timer.tv-flip .flip-digit::after{
+  content:'';position:absolute;left:0;right:0;top:50%;height:1px;
+  background:rgba(0,0,0,.65);box-shadow:0 1px 0 rgba(255,255,255,.05);
+}
+#tab-timer.tv-flip .flip-colon{align-self:center;color:var(--gold);font-size:clamp(1.6rem,7vw,2.4rem);font-weight:900;animation:tvBlink 1s steps(1,end) infinite}
+#tab-timer.tv-flip .timer-display .st{margin-top:14px;color:var(--muted);letter-spacing:3px}
 
 /* ===== Stopwatch ===== */
 .sw-display{text-align:center;font-size:clamp(2.8rem,10vw,4.4rem);font-weight:900;color:var(--gold2);
@@ -714,6 +806,15 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
             <div class="st" id="timer-state">جاهز</div>
           </div>
         </div>
+        <div class="study-panel" id="study-panel">
+          <div class="study-quote" id="study-quote">النجاح مش صدفة… هو تعب كل يوم شوية.</div>
+          <div class="study-meta">
+            <span class="study-chip">المرحلة: <b id="study-phase">مذاكرة</b></span>
+            <span class="study-chip">جلسات مكتملة: <b id="study-count">0</b></span>
+            <span class="study-chip">٢٥ د مذاكرة • ٥ د راحة</span>
+          </div>
+          <div class="study-dots" id="study-dots"></div>
+        </div>
         <div class="time-set" id="time-set">
           <div class="stepper">
             <button class="step-btn" data-t="th" data-d="1" title="زيادة">
@@ -761,6 +862,9 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
           <button class="preset" data-min="10">10 دقائق</button>
           <button class="preset" data-min="15">15 دقيقة</button>
           <button class="preset" data-min="30">30 دقيقة</button>
+          <button class="preset study-only" data-min="25" data-phase="study">٢٥ د مذاكرة</button>
+          <button class="preset study-only" data-min="5" data-phase="break">٥ د راحة</button>
+          <button class="preset study-only" data-min="15" data-phase="long">١٥ د راحة طويلة</button>
         </div>
         <div class="timer-actions">
           <button class="btn btn-gold" id="timer-start">ابدأ</button>
@@ -962,7 +1066,7 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
   <button id="floating-qibla" title="اتجاه القبلة"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v3M4.2 7l2.1 2.1M19.8 7l-2.1 2.1"/><line x1="12" y1="21" x2="12" y2="12"/><path d="M9 21h6"/></svg></button>
   <button id="floating-notify" title="تفعيل الإشعارات"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 21a2 2 0 0 0 3.4 0"/></svg></button>
   <button id="floating-bed" title="ساعة السرير"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.4 5.4 0 0 1-3.9 1.9 5.4 5.4 0 0 1-5.4-5.4c0-1.5.61-2.85 1.6-3.84A9.3 9.3 0 0 0 12 3z"/></svg></button>
-  <footer><span>مواقيت احترافي - الإصدار 3 - جميع الأوقات معروضة بتوقيت مكة المكرمة</span><div class="settings-bar"><button class="btn btn-ghost" id="settings-export" style="font-size:.72rem;padding:5px 10px">تصدير الإعدادات</button><button class="btn btn-ghost" id="settings-import-btn" style="font-size:.72rem;padding:5px 10px">استيراد الإعدادات</button><input type="file" id="settings-import" accept="application/json,.json" style="display:none"></div>
+  <footer><span>مواقيت احترافي - الإصدار 3.4 - جميع الأوقات معروضة بتوقيت مكة المكرمة</span><div class="settings-bar"><button class="btn btn-ghost" id="settings-export" style="font-size:.72rem;padding:5px 10px">تصدير الإعدادات</button><button class="btn btn-ghost" id="settings-import-btn" style="font-size:.72rem;padding:5px 10px">استيراد الإعدادات</button><input type="file" id="settings-import" accept="application/json,.json" style="display:none"></div>
   </footer>
 </div>
 
@@ -1784,8 +1888,87 @@ $('#time-set').addEventListener('click', e => {
   });
   el.addEventListener('input', () => { clampRange(id); previewTimer(); });
 });
-const TIMER_STYLES = [['ring','دائري'],['big','رقمي كبير'],['bar','شريط'],['compact','مبسّط']];
-let tStyle = 'ring';
+const TIMER_STYLES = [['royale','ملكي'],['aurora','أورورا'],['notebook','مذكرة'],['flip','فليب']];
+const PHASE_LABELS = { study:'مذاكرة', break:'راحة', long:'راحة طويلة' };
+const PHASE_MINUTES = { study:25, break:5, long:15 };
+const STUDY_QUOTES = [
+  'النجاح مش صدفة… هو تعب كل يوم شوية.',
+  'كل دقيقة تركيز بتقرّبك من هدفك.',
+  'مذاكرة ٢٥ دقيقة أحسن من ٣ ساعات تسويف.',
+  'متركّزش في التعب… ركّز في الهدف.',
+  'اللي بيتعب النهاردة، بيرتاح بكرة.',
+  'خد نفس عميق… وابدأ من جديد.',
+  'أنت أقدر مما تتخيل. كمّل.',
+  'الانتظام بيغلب المزاج. ذاكر كل يوم.',
+  'بعد ٥ دقايق راحة، نرجع أقوى.',
+  'هدفك قريب… باقي شوية صبر.'
+];
+let tStyle = 'royale';
+let studyPhase = 'study';
+let studySessions = parseInt(localStorage.getItem('moaqit_study_sessions') || '0', 10) || 0;
+let studyQuoteIdx = 0, studyQuoteTimer = null;
+function updateStudyUI(){
+  const q = $('#study-quote'); if (q) q.textContent = STUDY_QUOTES[studyQuoteIdx];
+  const p = $('#study-phase'); if (p) p.textContent = PHASE_LABELS[studyPhase] || 'مذاكرة';
+  const c = $('#study-count'); if (c) c.textContent = studySessions;
+  const d = $('#study-dots');
+  if (d){
+    const filled = studySessions % 4;
+    let html = '';
+    for (let i = 0; i < 4; i++) html += '<span class="' + (i < filled ? 'on' : '') + '"></span>';
+    if (d.innerHTML !== html) d.innerHTML = html;
+  }
+}
+function renderFlip(txt){
+  const el = $('#timer-display');
+  if (!el) return;
+  if (el.__flip === txt && el.querySelector('.flip-wrap')) return;
+  const parts = txt.split(':');
+  let html = '<span class="flip-wrap">';
+  parts.forEach((p, i) => {
+    if (i) html += '<span class="flip-colon">:</span>';
+    html += '<span class="flip-unit"><span class="flip-digit">' + p.charAt(0) + '</span><span class="flip-digit">' + p.charAt(1) + '</span></span>';
+  });
+  html += '</span>';
+  el.innerHTML = html;
+  el.__flip = txt;
+}
+function startStudyQuotes(){
+  if (studyQuoteTimer) return;
+  studyQuoteTimer = setInterval(() => {
+    if (tStyle !== 'notebook') return;
+    studyQuoteIdx = (studyQuoteIdx + 1) % STUDY_QUOTES.length;
+    const q = $('#study-quote'); if (q) q.textContent = STUDY_QUOTES[studyQuoteIdx];
+  }, 9000);
+}
+function setStudyInputs(min){
+  $('#th').value = 0; $('#tm').value = min; $('#ts').value = 0;
+}
+function pickStudyPhase(phase){
+  studyPhase = phase;
+  $$('#timer-presets .preset.study-only').forEach(b => b.classList.toggle('sel', b.dataset.phase === phase));
+  updateStudyUI();
+}
+function onTimerFinished(){
+  if (tStyle !== 'notebook') return;
+  if (studyPhase === 'study'){
+    studySessions++;
+    localStorage.setItem('moaqit_study_sessions', String(studySessions));
+    const long = studySessions % 4 === 0;
+    pickStudyPhase(long ? 'long' : 'break');
+    setStudyInputs(PHASE_MINUTES[long ? 'long' : 'break']);
+    $('#timer-state').textContent = long ? '٤ جلسات! خد راحة طويلة ١٥ دقيقة' : 'خلصت جلسة! خد راحة ٥ دقايق';
+    toast(long ? 'برافو! ٤ جلسات — خد راحة طويلة ١٥ دقيقة' : 'برافو! جلسة مذاكرة خلصت — خد راحة ٥ دقايق');
+  } else {
+    pickStudyPhase('study');
+    setStudyInputs(PHASE_MINUTES.study);
+    $('#timer-state').textContent = 'خلصت الراحة! يلا نكمل ٢٥ دقيقة';
+    toast('يلا نكمل! ابدأ ٢٥ دقيقة');
+  }
+  studyQuoteIdx = (studyQuoteIdx + 1) % STUDY_QUOTES.length;
+  updateStudyUI();
+  previewTimer();
+}
 function buildTimerStyleChips(){
   const wrap = $('#timer-styles');
   if (!wrap) return;
@@ -1801,29 +1984,38 @@ function buildTimerStyleChips(){
 function applyTimerStyle(){
   const el = $('#tab-timer');
   if (el){
-    el.classList.remove('tv-ring','tv-big','tv-bar','tv-compact');
+    el.classList.remove('tv-royale','tv-aurora','tv-notebook','tv-flip');
     el.classList.add('tv-' + tStyle);
   }
   $$('#timer-styles .chip').forEach(c => c.classList.toggle('sel', c.dataset.s === tStyle));
+  if (tStyle === 'notebook') startStudyQuotes();
+  updateStudyUI();
+  if (tStyle !== 'flip'){ const d = $('#timer-display'); if (d) d.__flip = null; }
+  if (timerEnd && !timerPaused) timerDisplay(timerEnd - Date.now());
+  else previewTimer();
 }
 function initTimerStyle(){
   const saved = localStorage.getItem('moaqit_tstyle');
-  tStyle = TIMER_STYLES.some(s => s[0] === saved) ? saved : 'ring';
+  tStyle = TIMER_STYLES.some(s => s[0] === saved) ? saved : 'royale';
   buildTimerStyleChips();
   applyTimerStyle();
+  pickStudyPhase(studyPhase);
+  if (tStyle === 'notebook') setStudyInputs(PHASE_MINUTES[studyPhase]);
 }
 $('#timer-styles').addEventListener('click', e => {
   const chip = e.target.closest('.chip');
   if (!chip) return;
   tStyle = chip.dataset.s;
   localStorage.setItem('moaqit_tstyle', tStyle);
+  if (tStyle === 'notebook' && !(timerEnd && !timerPaused)) setStudyInputs(PHASE_MINUTES[studyPhase]);
   applyTimerStyle();
 });
 function timerDisplay(ms){
   ms = Math.max(0, Math.ceil(ms/1000));
   const h = Math.floor(ms/3600), m = Math.floor(ms%3600/60), s = ms%60;
-  $('#timer-display').textContent = fmt(h) + ':' + fmt(m) + ':' + fmt(s);
-  setAnimated($('#timer-display'), fmt(h) + ':' + fmt(m) + ':' + fmt(s));
+  const txt = fmt(h) + ':' + fmt(m) + ':' + fmt(s);
+  if (tStyle === 'flip'){ renderFlip(txt); }
+  else { const el = $('#timer-display'); if (el){ el.textContent = txt; setAnimated(el, txt); } }
   const prog = timerTotal ? 1 - (ms / (timerTotal/1000)) : 0;
   $('#timer-progress').style.strokeDashoffset = CIRC * prog;
   const bar = $('#timer-bar-fill');
@@ -1839,6 +2031,7 @@ function timerTick(){
     $('#timer-state').textContent = 'انتهى الوقت!';
     setTimerButtons(false, false, true);
     startRinging('timer', 'انتهى الوقت!', 'مؤقت ' + totalStr(timerTotal) + ' اكتمل');
+    onTimerFinished();
     return;
   }
   timerRemain = remain;
@@ -1903,6 +2096,7 @@ $$('#timer-presets .preset').forEach(b => b.addEventListener('click', () => {
   $('#th').value = 0; $('#tm').value = min; $('#ts').value = 0;
   $$('#timer-presets .preset').forEach(x => x.classList.remove('sel'));
   b.classList.add('sel');
+  if (b.dataset.phase) pickStudyPhase(b.dataset.phase);
   previewTimer();
 }));
 
