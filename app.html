@@ -1,34 +1,176 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>تحميل تطبيق مواقيت احترافي — أندرويد</title>
+<meta name="description" content="تطبيق مواقيت احترافي: أذان كامل بصوت الشيخ، يعمل بدون إنترنت، إشعارات والشاشة مقفولة، تحديد الموقع والتوقيت تلقائياً.">
 <meta name="theme-color" content="#0A0F1A">
+<link rel="icon" href="favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<!-- Open Graph / Social -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="مواقيت احترافي — تطبيق الأذان للأندرويد">
+<meta property="og:description" content="أذان كامل بصوت الشيخ + يعمل بدون إنترنت + إشعارات في الخلفية. حمّل APK مباشرة.">
+<meta property="og:image" content="https://amr12349said-boop.github.io/moaqit/screenshot-prayer.png">
+<meta property="og:url" content="https://amr12349said-boop.github.io/moaqit/app.html">
+<meta property="og:locale" content="ar_EG">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="مواقيت احترافي — تطبيق الأذان للأندرويد">
+<meta name="twitter:description" content="أذان كامل + يعمل بدون إنترنت + إشعارات في الخلفية.">
+<meta name="twitter:image" content="https://amr12349said-boop.github.io/moaqit/screenshot-prayer.png">
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{min-height:100vh;background:#0A0F1A;color:#EAF0F7;font-family:"Segoe UI",Tahoma,Arial,sans-serif;display:flex;align-items:center;justify-content:center;padding:20px}
-.card{width:100%;max-width:520px;background:#0F1626;border:1px solid #1E2A3F;border-radius:22px;padding:26px 20px 22px;box-shadow:0 18px 50px rgba(0,0,0,.5)}
-h1{font-size:20px;text-align:center;margin-bottom:6px;color:#E9C46A}
-.sub{text-align:center;font-size:13px;color:#93A2B8;margin-bottom:20px;line-height:1.7}
-.btn{display:block;text-align:center;text-decoration:none;padding:16px;border-radius:14px;font-size:17px;font-weight:700;margin-bottom:12px;background:linear-gradient(180deg,#E9C46A,#C99B34);color:#12181F;border:0}
+:root{
+  --bg:#0A0F1A;--card:#0F1626;--line:#1E2A3F;--text:#EAF0F7;--muted:#93A2B8;
+  --gold:#E9C46A;--gold2:#C99B34;--soft:#141D2F;--soft2:#101A2B;--note:#8B9AB0;
+  color-scheme:dark;
+}
+html[data-theme="light"]{
+  --bg:#F2F5FA;--card:#FFFFFF;--line:#E1E8F1;--text:#132033;--muted:#5A6B82;
+  --gold:#A9791B;--gold2:#8A6210;--soft:#EEF3FA;--soft2:#F4F8FD;--note:#6B7A90;
+  color-scheme:light;
+}
+body{min-height:100vh;background:radial-gradient(900px 500px at 50% -10%,rgba(233,196,106,.10),transparent 60%),var(--bg);
+  color:var(--text);font-family:"Segoe UI",Tahoma,Arial,sans-serif;display:flex;align-items:flex-start;justify-content:center;padding:18px 14px 40px;transition:background .3s}
+.card{width:100%;max-width:540px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px 18px 20px;box-shadow:0 18px 50px rgba(0,0,0,.45)}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:16px}
+.themebtn{background:var(--soft);border:1px solid var(--line);color:var(--muted);border-radius:10px;width:38px;height:38px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+.apphead{display:flex;align-items:center;gap:13px;margin-bottom:16px}
+.apphead img{width:64px;height:64px;border-radius:16px;border:1px solid var(--line);box-shadow:0 8px 20px rgba(0,0,0,.35);flex:0 0 auto}
+.apphead h1{font-size:19px;color:var(--gold);line-height:1.3;margin-bottom:5px}
+.sub{font-size:13px;color:var(--muted);line-height:1.8;margin:-6px 0 14px;text-align:center}
+.badge{display:inline-flex;flex-wrap:wrap;gap:6px;font-size:11.5px;color:var(--muted)}
+.badge span{background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:3px 9px;white-space:nowrap}
+
+.screens{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 12px;margin-bottom:6px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.shot{flex:0 0 auto;width:132px;scroll-snap-align:start;text-align:center}
+.screens img{width:132px;height:262px;object-fit:contain;border-radius:16px;border:1px solid var(--line);display:block;background:var(--soft)}
+.shot span{display:block;font-size:11px;color:var(--note);margin-top:6px;font-weight:600}
+
+h2.sec{font-size:13px;color:var(--gold);margin:16px 0 9px;font-weight:800}
+.features{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.features li{font-size:12.5px;color:var(--text);background:var(--soft2);border:1px solid var(--line);border-radius:11px;padding:9px 11px;display:flex;align-items:center;gap:7px;line-height:1.5}
+.features li b{font-size:14px;line-height:1}
+
+.btn{position:relative;overflow:hidden;display:block;text-align:center;text-decoration:none;padding:16px;border-radius:14px;font-size:17px;font-weight:800;margin:18px 0 10px;background:linear-gradient(180deg,var(--gold),var(--gold2));color:#12181F;border:0;cursor:pointer;animation:pulse 2s infinite}
+html[data-theme="light"] .btn{color:#fff}
 .btn:active{transform:translateY(1px)}
-.alt{display:block;text-decoration:none;text-align:center;padding:12px;border-radius:12px;font-size:14px;color:#CBD7E6;background:#141D2F;border:1px solid #22314A;margin-bottom:9px}
-.note{font-size:12.5px;color:#8B9AB0;line-height:1.9;margin-top:16px;border-top:1px solid #1E2A3F;padding-top:14px}
-.note b{color:#E9C46A}
-.steps{font-size:13px;color:#B9C6D8;line-height:2;margin-top:14px;background:#101A2B;border:1px solid #1E2A3F;border-radius:12px;padding:12px 14px}
-.size{text-align:center;font-size:12px;color:#6F809A;margin-top:14px}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(233,196,106,.5)}50%{box-shadow:0 0 0 12px rgba(233,196,106,0)}}
+
+.progress{display:none;height:8px;border-radius:99px;background:var(--soft);border:1px solid var(--line);overflow:hidden;margin-bottom:12px}
+.progress.on{display:block}
+.progress i{display:block;height:100%;width:40%;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--gold2));animation:slide 1.1s ease-in-out infinite}
+@keyframes slide{0%{margin-right:-40%}100%{margin-right:100%}}
+.progtext{display:none;text-align:center;font-size:12px;color:var(--note);margin-bottom:10px}
+.progtext.on{display:block}
+
+.row{display:flex;gap:9px;margin-bottom:10px}
+.ghost{flex:1;display:block;text-decoration:none;text-align:center;padding:11px;border-radius:12px;font-size:13.5px;font-weight:700;color:var(--text);background:var(--soft);border:1px solid var(--line);cursor:pointer;font-family:inherit}
+.ghost:active{transform:translateY(1px)}
+
+.qr{display:flex;align-items:center;gap:14px;background:var(--soft2);border:1px solid var(--line);border-radius:14px;padding:12px;margin:6px 0 10px}
+.qr img{width:96px;height:96px;border-radius:10px;background:#fff;padding:5px;flex:0 0 auto}
+.qr p{font-size:12.5px;color:var(--note);line-height:1.8}
+.qr p b{color:var(--gold)}
+
+details{background:var(--soft2);border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:9px}
+details summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--text);list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:'▸ ';color:var(--gold)}
+details[open] summary::before{content:'▾ '}
+details .body{font-size:12.5px;color:var(--note);line-height:1.9;margin-top:9px}
+.alt{display:block;text-decoration:none;text-align:center;padding:11px;border-radius:11px;font-size:13px;color:var(--text);background:var(--soft);border:1px solid var(--line);margin-top:8px}
+
+.steps{font-size:13px;color:var(--muted);line-height:2;background:var(--soft2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:12px}
+.steps b{color:var(--gold)}
+.hash{font-family:Consolas,monospace;font-size:11px;word-break:break-all;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:9px;margin-top:8px;color:var(--muted);direction:ltr;text-align:left}
+.size{text-align:center;font-size:12px;color:var(--note);margin-top:14px}
+footer{text-align:center;font-size:11.5px;color:var(--note);margin-top:16px;border-top:1px solid var(--line);padding-top:14px;line-height:1.9}
+footer b{color:var(--gold)}
+.toast{position:fixed;bottom:18px;right:50%;transform:translateX(50%) translateY(20px);background:var(--gold);color:#12181F;font-size:13px;font-weight:800;padding:10px 18px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s;z-index:9}
+.toast.on{opacity:1;transform:translateX(50%) translateY(0)}
+
+@media (max-width:380px){
+  .card{padding:18px 13px}
+  .apphead h1{font-size:17px}
+  .features{grid-template-columns:1fr}
+  .apphead img{width:56px;height:56px}
+}
 </style>
 </head>
 <body>
 <div class="card">
-  <h1>مواقيت احترافي — تطبيق أندرويد</h1>
+
+  <div class="top">
+    <span class="badge" style="font-size:12px"><span>الإصدار 3.3</span><span>آخر تحديث: 18 سبتمبر 2026</span></span>
+    <button class="themebtn" id="theme" title="تبديل الوضع">🌙</button>
+  </div>
+
+  <div class="apphead">
+    <img src="icon-192.png" alt="أيقونة تطبيق مواقيت">
+    <div>
+      <h1>مواقيت احترافي</h1>
+      <div class="badge"><span>5.5 ميجا</span><span>أندرويد 7+</span><span>بدون إنترنت</span></div>
+    </div>
+  </div>
+
   <div class="sub">الأذان بصوت كامل لكل الصلوات، يشتغل والشاشة مقفولة والتطبيق مغلق، ويعمل بدون إنترنت.</div>
 
-  <a class="btn" href="https://github.com/amr12349said-boop/moaqit/releases/download/android-v1/mawaqit.apk" rel="noopener">تحميل التطبيق (APK)</a>
+  <h2 class="sec">شكل التطبيق</h2>
+  <div class="screens">
+    <div class="shot"><img src="screenshot-prayer.png" alt="شاشة المواقيت"><span>المواقيت</span></div>
+    <div class="shot"><img src="screenshot-adhan.png" alt="شاشة الأذان"><span>الأذان</span></div>
+    <div class="shot"><img src="screenshot-timer-notebook.png" alt="المؤقت — مذكرة"><span>مؤقت المذاكرة</span></div>
+    <div class="shot"><img src="screenshot-timer-flip.png" alt="المؤقت — فليب"><span>مؤقت فليب</span></div>
+    <div class="shot"><img src="screenshot-world.png" alt="توقيتات العالم"><span>توقيتات العالم</span></div>
+  </div>
 
-  <a class="alt" href="https://raw.githubusercontent.com/amr12349said-boop/moaqit/main/mawaqit.apk" rel="noopener">لو الرابط ما اشتغلش — سيرفر بديل 1</a>
-  <a class="alt" href="https://amr12349said-boop.github.io/moaqit/mawaqit.apk" rel="noopener">سيرفر بديل 2</a>
+  <h2 class="sec">المميزات</h2>
+  <ul class="features">
+    <li><b>🕌</b> أذان كامل بصوت الشيخ</li>
+    <li><b>📴</b> يعمل بدون إنترنت</li>
+    <li><b>🔔</b> إشعارات والشاشة مقفولة</li>
+    <li><b>📍</b> تحديد الموقع والتوقيت تلقائياً</li>
+    <li><b>🌍</b> توقيتات دول العالم</li>
+    <li><b>🧭</b> القبلة والاتجاه</li>
+    <li><b>⏱️</b> مؤقت بعدة أشكال + مذاكرة</li>
+    <li><b>🎨</b> واجهة عربية أنيقة</li>
+  </ul>
+
+  <a class="btn" id="dl" href="https://github.com/amr12349said-boop/moaqit/releases/latest/download/mawaqit.apk" rel="noopener">تحميل التطبيق (APK)</a>
+  <div class="progress" id="prog"><i></i></div>
+  <div class="progtext" id="progtxt">جاري بدء التحميل… لو مافتحش، اسحب إشعار التحميل واضغط استكمال.</div>
+
+  <div class="row">
+    <button class="ghost" id="copy">📋 نسخ رابط التحميل</button>
+  </div>
+
+  <div class="qr">
+    <img id="qr" src="" alt="QR رابط التحميل">
+    <p>فاتح الصفحة من الكمبيوتر؟<br><b>امسح الكود بالموبايل</b> وحمّل التطبيق مباشرة.</p>
+  </div>
+
+  <details>
+    <summary>روابط بديلة (لو الرابط الأساسي ما اشتغلش)</summary>
+    <div class="body">
+      <a class="alt" href="https://raw.githubusercontent.com/amr12349said-boop/moaqit/main/mawaqit.apk" rel="noopener">سيرفر بديل 1</a>
+      <a class="alt" href="https://amr12349said-boop.github.io/moaqit/mawaqit.apk" rel="noopener">سيرفر بديل 2</a>
+      <div style="margin-top:8px">يفضّل استخدام الرابط الأساسي (GitHub Releases) وهو المصدر الموثوق.</div>
+    </div>
+  </details>
+
+  <details>
+    <summary>التحقق من الملف (SHA-256)</summary>
+    <div class="body">
+      بصمة ملف الإصدار الحالي:
+      <div class="hash">D5BF92877BF0CE01F53A626DABB86BD0D4E1AFA0693907843E59A52724258B32</div>
+    </div>
+  </details>
 
   <div class="steps">
     1. لازم تفتح الصفحة دي في <b>Chrome</b> مش من جوه واتساب أو فيسبوك.<br>
@@ -38,6 +180,61 @@ h1{font-size:20px;text-align:center;margin-bottom:6px;color:#E9C46A}
   </div>
 
   <div class="size">حجم الملف: 5.5 ميجابايت — يعمل على أندرويد 7 أو أحدث</div>
+
+  <footer>
+    © 2026 <b>مواقيت احترافي</b> · صُنع بـ ❤️ للمسلمين
+  </footer>
 </div>
+
+<div class="toast" id="toast">تم النسخ ✅</div>
+
+<script>
+var DL = 'https://github.com/amr12349said-boop/moaqit/releases/latest/download/mawaqit.apk';
+
+document.getElementById('qr').src =
+  'https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=8&data=' + encodeURIComponent(DL);
+
+var root = document.documentElement;
+var tbtn = document.getElementById('theme');
+try {
+  var saved = localStorage.getItem('moaqit_dl_theme');
+  if (saved === 'light' || saved === 'dark') root.setAttribute('data-theme', saved);
+} catch (e) {}
+function syncTheme(){ tbtn.textContent = root.getAttribute('data-theme') === 'light' ? '☀️' : '🌙'; }
+syncTheme();
+tbtn.addEventListener('click', function(){
+  var next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  root.setAttribute('data-theme', next);
+  try { localStorage.setItem('moaqit_dl_theme', next); } catch (e) {}
+  syncTheme();
+});
+
+var toast = document.getElementById('toast');
+function showToast(msg){
+  toast.textContent = msg;
+  toast.classList.add('on');
+  setTimeout(function(){ toast.classList.remove('on'); }, 1800);
+}
+document.getElementById('copy').addEventListener('click', function(){
+  function done(){ showToast('تم نسخ الرابط ✅'); }
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(DL).then(done, function(){ fallback(); });
+  } else { fallback(); }
+  function fallback(){
+    var t = document.createElement('textarea');
+    t.value = DL; document.body.appendChild(t); t.select();
+    try { document.execCommand('copy'); done(); } catch (e) { showToast('انسخ الرابط من الزر الأساسي'); }
+    document.body.removeChild(t);
+  }
+});
+
+var prog = document.getElementById('prog');
+var progtxt = document.getElementById('progtxt');
+document.getElementById('dl').addEventListener('click', function(){
+  prog.classList.add('on');
+  progtxt.classList.add('on');
+  setTimeout(function(){ prog.classList.remove('on'); progtxt.classList.remove('on'); }, 9000);
+});
+</script>
 </body>
 </html>
