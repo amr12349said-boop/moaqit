@@ -1,0 +1,64 @@
+name: Build Android APK
+
+on:
+  push:
+    paths:
+      - 'android/**'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Copy web assets into Android app
+        run: bash android/sync-assets.sh
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Build release APK
+        working-directory: android
+        run: gradle assembleRelease --no-daemon --stacktrace
+
+      - name: Rename APK
+        run: |
+          mkdir -p out
+          cp android/app/build/outputs/apk/release/app-release.apk out/mawaqit.apk
+          ls -lh out
+
+      - name: Upload APK as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mawaqit-apk
+          path: out/mawaqit.apk
+          if-no-files-found: error
+
+      - name: Publish APK on Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-v1
+          name: "مواقيت احترافي — Android APK"
+          body: |
+            تطبيق أندرويد كامل لمواقيت الصلاة (يعمل أوفلاين).
+
+            - الأذان بصوت كامل لكل الصلوات الخمس (حتى والشاشة مقفولة) عبر خدمة قدامية.
+            - تنبيه قبل كل صلاة بـ ١٠ دقائق + إشعار لحظة الأذان.
+            - المنبه، المؤقت، ساعة الإيقاف، توقيت العالم، القبلة، التقويم الهجري.
+            - لا يحتاج إنترنت بعد أول تشغيل.
+          files: out/mawaqit.apk
+          fail_on_unmatched_files: true

@@ -1,0 +1,15 @@
+# Android build outputs
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/captures/
+out/
+
+# ملفات الموقع المنسوخة داخل الأصول (تُنسخ تلقائياً وقت البناء)
+android/app/src/main/assets/*
+!android/app/src/main/assets/.gitkeep
+
+# نظام
+.DS_Store
+Thumbs.db

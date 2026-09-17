@@ -1,0 +1,2 @@
+# مجلد أصول الموقع — يتم تعبئته تلقائياً من ملفات الموقع في جذر المستودع
+# بواسطة .github/workflows/android.yml (أو android/sync-assets.sh محلياً)

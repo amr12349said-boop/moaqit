@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">مواقيت احترافي</string>
+    <string name="ch_azan">الأذان</string>
+    <string name="ch_alerts">تنبيهات الصلاة</string>
+    <string name="adhan_now">حان الآن وقت الصلاة</string>
+    <string name="adhan_playing">الأذان يعمل الآن</string>
+    <string name="stop">إيقاف</string>
+    <string name="soon_10">بعد ١٠ دقائق</string>
+</resources>
