@@ -2,12 +2,15 @@ package com.mawaqit.app;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
@@ -124,7 +127,7 @@ public class MainActivity extends Activity {
         setContentView(web);
         web.loadUrl(HOME);
 
-        requestNotifPermission();
+        askNotifPermission();
     }
 
     public class Bridge {
@@ -132,9 +135,52 @@ public class MainActivity extends Activity {
         public void postMessage(String json) {
             Router.handle(MainActivity.this, web, json);
         }
+
+        @JavascriptInterface
+        public boolean hasNotifPermission() {
+            try {
+                if (Build.VERSION.SDK_INT >= 33 &&
+                        checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+                NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                return nm == null || nm.areNotificationsEnabled();
+            } catch (Exception e) {
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public void requestNotifPermission() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    askNotifPermission();
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void openNotifSettings() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Intent i = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+                        i.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
+                        startActivity(i);
+                    } catch (Exception e) {
+                        try {
+                            startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                    Uri.parse("package:" + getPackageName())));
+                        } catch (Exception e2) { }
+                    }
+                }
+            });
+        }
     }
 
-    private void requestNotifPermission() {
+    private void askNotifPermission() {
         try {
             if (Build.VERSION.SDK_INT >= 33 &&
                     checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
