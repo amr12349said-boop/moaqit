@@ -75,7 +75,7 @@ public class Notify {
 
         if (Build.VERSION.SDK_INT >= 23) {
             b.addAction(new Notification.Action.Builder(
-                    (Icon) null, c.getString(R.string.stop), stopPi()).build());
+                    (Icon) null, c.getString(R.string.stop), stopPi(c)).build());
         }
         return b.build();
     }
