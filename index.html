@@ -337,6 +337,24 @@ section.active{display:block}
 .world-empty{color:var(--muted);text-align:center;padding:20px 0;font-weight:700;grid-column:1/-1}
 
 /* ===== Prayer times ===== */
+.prayer-hero{
+  position:relative;overflow:hidden;
+  background:linear-gradient(160deg,rgba(212,175,55,.22),rgba(212,175,55,.04)),var(--card);
+  border:1px solid var(--gold);border-radius:22px;padding:20px;
+}
+.prayer-hero::after{
+  content:'';position:absolute;inset-inline-start:-50px;bottom:-50px;width:170px;height:170px;border-radius:50%;
+  background:radial-gradient(circle,rgba(224,180,90,.28),transparent 70%);pointer-events:none;
+}
+.ph-label{font-size:.85rem;font-weight:800;color:var(--muted)}
+.ph-main{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px}
+.ph-name{font-size:2.1rem;font-weight:900;color:var(--gold2)}
+.ph-time{font-size:1.7rem;font-weight:900;color:var(--text);font-variant-numeric:tabular-nums;direction:ltr}
+.ph-count{margin-top:10px;font-size:1.25rem;font-weight:900;color:var(--gold2);direction:ltr;text-align:start;font-variant-numeric:tabular-nums}
+.ph-count em{font-style:normal;color:var(--muted);font-size:.8rem;font-weight:800;margin-inline-end:8px;direction:rtl}
+.ph-bar{height:9px;border-radius:99px;background:var(--track);margin-top:14px;overflow:hidden;position:relative;z-index:1}
+.ph-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .4s ease}
+.ph-loc{margin-top:12px;font-size:.76rem;color:var(--muted);font-weight:700;text-align:start;position:relative;z-index:1}
 .prayer-loc{display:flex;flex-direction:column;gap:10px}
 .prayer-loc select{
   width:100%;background:var(--input-bg);color:var(--text);
@@ -352,22 +370,27 @@ section.active{display:block}
 }
 .manual-coords input:focus{outline:none;border-color:var(--gold)}
 #prayer-gps{display:flex;align-items:center;gap:8px;justify-content:center}
-.next-banner{
-  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-  background:linear-gradient(145deg,rgba(212,175,55,.18),rgba(212,175,55,.05));
-  border:1px solid var(--gold);border-radius:14px;padding:12px 16px;margin-bottom:14px;font-weight:800;
+.prayer-grid{display:grid;grid-template-columns:1fr;gap:9px}
+.prayer-item{
+  display:flex;align-items:center;gap:12px;text-align:start;
+  background:var(--subtle);border:1px solid var(--card-border);border-radius:15px;
+  padding:13px 16px;transition:.2s;
 }
-.nb-label{color:var(--muted);font-size:.85rem}
-.nb-name{color:var(--gold2);font-size:1.15rem}
-.nb-time{color:var(--text);font-size:1.05rem}
-.nb-count{margin-inline-start:auto;font-size:1.3rem;color:var(--gold2);font-variant-numeric:tabular-nums}
-.prayer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-.prayer-item{background:var(--subtle);border:1px solid var(--card-border);border-radius:14px;padding:14px 12px;text-align:center;transition:.2s}
-.prayer-item.next{border-color:var(--gold);background:linear-gradient(160deg,rgba(212,175,55,.18),rgba(212,175,55,.04));box-shadow:0 4px 18px rgba(212,175,55,.15)}
-.prayer-item .pname{color:var(--muted);font-weight:800;font-size:.9rem}
+.prayer-item:hover{border-color:rgba(212,175,55,.5)}
+.prayer-item.next{
+  border-color:var(--gold);border-width:1.5px;
+  background:linear-gradient(160deg,rgba(212,175,55,.2),rgba(212,175,55,.04));
+  box-shadow:0 4px 18px rgba(212,175,55,.18);
+}
+.prayer-item .pname{flex:1;font-size:1.05rem;font-weight:800;color:var(--text)}
+.prayer-item.sunnah .pname{color:var(--muted)}
 .prayer-item.next .pname{color:var(--gold2)}
-.badge-next{display:inline-block;background:linear-gradient(145deg,var(--gold2),var(--gold));color:#171310;font-size:.65rem;border-radius:999px;padding:2px 8px;margin-inline-start:5px;vertical-align:middle}
-.prayer-item .ptime{font-size:1.5rem;font-weight:900;color:var(--gold2);margin-top:6px;font-variant-numeric:tabular-nums}
+.prayer-item .pcount{font-size:.72rem;color:var(--gold2);font-weight:800;white-space:nowrap;direction:ltr}
+.prayer-item .ptime{font-size:1.4rem;font-weight:900;color:var(--gold2);font-variant-numeric:tabular-nums;direction:ltr}
+.badge-next{
+  display:inline-flex;align-items:center;background:linear-gradient(145deg,var(--gold2),var(--gold));
+  color:#171310;font-size:.62rem;font-weight:900;border-radius:999px;padding:3px 9px;margin-inline-start:7px;vertical-align:middle;
+}
 .prayer-note{color:var(--muted);font-size:.78rem;font-weight:600;margin-top:14px;text-align:center}
 .azan-row{display:flex;align-items:center;gap:14px}
 .azan-row > div{flex:1}
@@ -729,38 +752,48 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
 
   <!-- ================= مواقيت الصلاة ================= -->
   <section id="tab-prayer">
+    <div class="card prayer-hero">
+      <div class="ph-label">الصلاة القادمة</div>
+      <div class="ph-main">
+        <div class="ph-name" id="prayer-next-name">الفجر</div>
+        <div class="ph-time" id="prayer-next-time"></div>
+      </div>
+      <div class="ph-count"><em>متبقي على الأذان</em><span id="prayer-countdown">--:--:--</span></div>
+      <div class="ph-bar"><div class="ph-bar-fill" id="prayer-progress"></div></div>
+      <div class="ph-loc" id="prayer-loc-label"></div>
+    </div>
+
+    <div class="card">
+      <h2>مواقيت اليوم <span class="line"></span></h2>
+      <div class="prayer-grid" id="prayer-grid"></div>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn btn-ghost" id="prayer-cal-btn" style="flex:1">التقويم الهجري</button>
+        <button class="btn btn-ghost" id="prayer-share-btn" style="flex:1">مشاركة المواقيت</button>
+      </div>
+    </div>
+
     <div class="card">
       <h2>موقع الصلاة <span class="line"></span></h2>
       <div class="prayer-loc">
-        <button class="btn btn-ghost" id="prayer-gps">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>
-          تحديد موقعي تلقائياً
-        </button>
-        <select id="prayer-city"></select>
         <div class="manual-coords">
           <input type="number" id="plat" step="0.0001" min="-90" max="90" placeholder="خط العرض">
           <input type="number" id="plon" step="0.0001" min="-180" max="180" placeholder="خط الطول">
           <button class="btn btn-ghost" id="prayer-apply">تطبيق</button>
         </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-gold" id="prayer-gps" style="flex:1;white-space:nowrap">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>
+            تحديد موقعي تلقائياً
+          </button>
+          <select id="prayer-city" style="flex:1;min-width:0"></select>
+        </div>
         <div class="prayer-note" id="prayer-loc-status" style="text-align:start"></div>
       </div>
-      <div class="region-chips" id="prayer-methods" style="margin-top:12px"></div>
     </div>
 
     <div class="card">
-      <h2>مواقيت اليوم <span class="line"></span></h2>
-      <div class="next-banner">
-        <span class="nb-label">الصلاة القادمة:</span>
-        <span class="nb-name" id="prayer-next-name">الفجر</span>
-        <span class="nb-time" id="prayer-next-time"></span>
-        <span class="nb-count" id="prayer-countdown">--:--:--</span>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-        <button class="btn btn-ghost" id="prayer-cal-btn" style="flex:1">التقويم الهجري</button>
-        <button class="btn btn-ghost" id="prayer-share-btn" style="flex:1">مشاركة المواقيت</button>
-      </div>
-      <div class="prayer-grid" id="prayer-grid"></div>
-      <div class="prayer-note" id="prayer-loc-label"></div>
+      <h2>طريقة حساب المواقيت <span class="line"></span></h2>
+      <div class="region-chips" id="prayer-methods"></div>
     </div>
 
     <div class="card">
@@ -1467,7 +1500,7 @@ function startRinging(type, title, sub, soundKey){
   const key = (s === 'custom' && customSound) ? 'custom' : (SOUNDS[s] ? s : 'azan');
   if (type === 'prayer' && s === 'userazan'){ playAzanFile(true); }
   else ringSound(key, true);
-  if (navigator.vibrate) vibrateTimer = setInterval(() => navigator.vibrate([400,200,400]), 2000);
+  if (type !== 'prayer' && navigator.vibrate) vibrateTimer = setInterval(() => navigator.vibrate([400,200,400]), 2000);
   try {
     if ('Notification' in window && Notification.permission === 'granted'){
       const n = new Notification('⏰ ' + title, { body: sub + ' • اضغط لفتح الرنة', tag: 'moaqit-alarm', requireInteraction: true });
@@ -1984,7 +2017,7 @@ const METHODS = [
   {id:'hanafi', name:'أم القرى (عصر حنفي)', fajr:18.5, isha:null, ishaMin:90, asr:2}
 ];
 
-let pMode = 'city', pCity = PRAYER_CITIES[0], pLat = 21.3891, pLon = 39.8579, pMethod = 'ummalqura', pAzan = true, pGeoLabel = '';
+let pMode = 'city', pCity = PRAYER_CITIES[0], pLat = 21.3891, pLon = 39.8579, pMethod = 'ummalqura', pAzan = true, pGeoLabel = '', pGeoIana = '', pAutoTried = false;
 let prayerTimes = null, prayerDateKey = '', lastRenderMin = -1, pLastTrigger = null;
 
 function fixAngle(a){ a = a - 360*Math.floor(a/360); return a < 0 ? a + 360 : a; }
@@ -2019,9 +2052,10 @@ function sunPos(jd){
   const eqt = q/15 - fixHour(RA);
   return {decl, eqt};
 }
-function pTZ(){ return pMode === 'city' ? pCity.tz : undefined; }
+function pTZ(){ return pMode === 'city' ? pCity.tz : (pGeoIana || undefined); }
 function pOffsetHours(){
   if (pMode === 'city') return window.tzOffset ? window.tzOffset(pCity.tz)/60 : 3;
+  if (pGeoIana && window.tzOffset){ const o = window.tzOffset(pGeoIana); if (isFinite(o)) return o/60; }
   return -new Date().getTimezoneOffset()/60;
 }
 function localDateParts(dt, tz){
@@ -2098,17 +2132,43 @@ function reverseGeocode(lat, lon, fallbackLabel){
       const city = d.city || d.locality || '';
       const country = d.countryName || '';
       pGeoLabel = [city, country].filter(Boolean).join('، ') || fallbackLabel || 'موقعك الحالي';
-      updateLocStatus();
-      renderPrayer();
+      methodForCountry(d.countryCode);
+      savePrayer();
+      buildMethods();
+      computePrayer(); renderPrayer(); updateLocStatus();
     })
     .catch(() => {
       pGeoLabel = fallbackLabel || 'موقعك الحالي';
+      savePrayer();
       updateLocStatus();
       renderPrayer();
     });
 }
+const METHOD_BY_COUNTRY = {EG:'egypt', SD:'egypt', SA:'ummalqura', AE:'dubai', KW:'ummalqura', QA:'ummalqura', BH:'ummalqura', OM:'ummalqura', YE:'ummalqura', PK:'karachi', IN:'karachi', BD:'karachi', AF:'karachi', US:'isna', CA:'isna'};
+function methodForCountry(cc){
+  if (!cc) return;
+  if (localStorage.getItem('moaqit_method_user') === '1') return;
+  const m = METHOD_BY_COUNTRY[String(cc).toUpperCase()];
+  if (m && METHODS.some(x => x.id === m)) pMethod = m;
+}
+function validIana(tz){
+  if (!tz || typeof tz !== 'string' || tz.indexOf('/') < 0) return '';
+  try { new Intl.DateTimeFormat('en-US', {timeZone: tz}); return tz; } catch(e){ return ''; }
+}
+function timeZoneForCoords(lat, lon, cb){
+  let called = false;
+  const finish = tz => { if (called) return; called = true; cb(validIana(tz)); };
+  const t = setTimeout(() => finish(''), 6000);
+  try {
+    fetch('https://timeapi.io/api/TimeZone/coordinate?latitude=' + lat + '&longitude=' + lon)
+      .then(r => r.json())
+      .then(d => { clearTimeout(t); finish((d && (d.timeZone || d.timezone)) || ''); })
+      .catch(() => { clearTimeout(t); finish(''); });
+  } catch(e){ clearTimeout(t); finish(''); }
+}
 function renderPrayer(){
   computePrayer();
+  const nowMin = prayerNowMin();
   const nxt = nextPrayerInfo();
   const grid = $('#prayer-grid');
   grid.innerHTML = '';
@@ -2116,15 +2176,32 @@ function renderPrayer(){
     const tm = prayerTimes[p[0]];
     const isNext = nxt.key === p[0];
     const div = document.createElement('div');
-    div.className = 'prayer-item' + (isNext ? ' next' : '');
-    div.innerHTML = '<div class="pname">' + p[1] + (isNext ? ' <span class="badge-next">القادمة</span>' : '') + '</div>' +
-      '<div class="ptime">' + minToStr(tm) + '</div>';
+    div.className = 'prayer-item' + (isNext ? ' next' : '') + (p[0] === 'sunrise' ? ' sunnah' : '');
+    const count = isNext
+      ? '<div class="pcount">' + fmt(Math.floor(nxt.remaining/3600)) + ':' + fmt(Math.floor(nxt.remaining%3600/60)) + ':' + fmt(nxt.remaining%60) + '</div>'
+      : '';
+    div.innerHTML = '<div class="pname">' + p[1] + (isNext ? ' <span class="badge-next">التالي</span>' : '') + '</div>' +
+      count + '<div class="ptime">' + minToStr(tm) + '</div>';
     grid.appendChild(div);
   });
   $('#prayer-next-name').textContent = nxt.name;
   $('#prayer-next-time').textContent = minToStr(nxt.time);
   $('#prayer-loc-label').textContent = pLabel() + ' • ' + ((METHODS.find(x => x.id === pMethod) || {}).name || '') + ' • الإمساك ' + minToStr(prayerTimes.imsak);
-  lastRenderMin = prayerNowMin();
+  const prog = $('#prayer-progress');
+  if (prog){
+    let p0 = null, p1 = null;
+    for (let i = 0; i < PRAYER_FARD.length; i++){
+      const t = prayerTimes[PRAYER_FARD[i][0]];
+      if (t <= nowMin) p0 = t;
+      else { p1 = t; break; }
+    }
+    if (p0 === null) p0 = prayerTimes.isha - 1440;
+    if (p1 === null) p1 = prayerTimes.fajr + 1440;
+    let pct = 0;
+    if (p1 !== null && p1 > p0){ pct = Math.max(0, Math.min(100, ((nowMin - p0) / (p1 - p0)) * 100)); }
+    prog.style.width = pct.toFixed(1) + '%';
+  }
+  lastRenderMin = nowMin;
   updatePrayerCountdown();
 }
 function updatePrayerCountdown(){
@@ -2215,23 +2292,46 @@ function buildMethods(){
 }
 function savePrayer(){
   localStorage.setItem('moaqit_prayer', JSON.stringify({
-    mode: pMode, city: pCity ? pCity.id : 0, lat: pLat, lon: pLon, method: pMethod, azan: pAzan
+    mode: pMode, city: pCity ? pCity.id : 0, lat: pLat, lon: pLon, method: pMethod, azan: pAzan,
+    label: pGeoLabel || '', iana: pGeoIana || ''
   }));
 }
 function loadPrayer(){
   let s = null;
   try { s = JSON.parse(localStorage.getItem('moaqit_prayer') || 'null'); } catch(e){}
-  if (!s) return;
+  if (!s) return false;
   if (s.method && METHODS.some(x => x.id === s.method)) pMethod = s.method;
   if (typeof s.azan === 'boolean') pAzan = s.azan;
+  if (typeof s.label === 'string') pGeoLabel = s.label;
+  if (typeof s.iana === 'string') pGeoIana = validIana(s.iana);
   if (s.mode === 'city' && Number.isInteger(s.city) && PRAYER_CITIES[s.city]){
     pMode = 'city'; pCity = PRAYER_CITIES[s.city]; pLat = pCity.lat; pLon = pCity.lon;
   } else if ((s.mode === 'gps' || s.mode === 'manual') && isFinite(s.lat) && isFinite(s.lon)){
     pMode = s.mode; pLat = s.lat; pLon = s.lon;
   }
+  return true;
+}
+const GPS_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>';
+function applyGeo(lat, lon, label, iana, cc){
+  pMode = 'gps'; pLat = lat; pLon = lon; pGeoLabel = '';
+  const tz = validIana(iana); if (tz) pGeoIana = tz;
+  methodForCountry(cc);
+  const pl = $('#plat'), pn = $('#plon');
+  if (pl) pl.value = lat.toFixed(4);
+  if (pn) pn.value = lon.toFixed(4);
+  const pc = $('#prayer-city'); if (pc) pc.value = '';
+  savePrayer(); computePrayer(); renderPrayer(); updateLocStatus();
+  reverseGeocode(lat, lon, label);
+}
+function autoLocate(){
+  if (pAutoTried) return;
+  pAutoTried = true;
+  ipLocate(function(lat, lon, label, iana, cc){
+    applyGeo(lat, lon, label || 'تم تحديد موقعك تقريبياً', iana, cc);
+  }, function(){});
 }
 function initPrayer(){
-  loadPrayer();
+  const had = loadPrayer();
   buildPrayerCitySelect();
   buildMethods();
   $('#prayer-city').value = pMode === 'city' && pCity ? String(pCity.id) : '';
@@ -2242,6 +2342,7 @@ function initPrayer(){
   computePrayer();
   renderPrayer();
   updateLocStatus();
+  if (!had) autoLocate();
 }
 $('#prayer-city').addEventListener('change', e => {
   if (e.target.value === '') return;
@@ -2252,20 +2353,15 @@ $('#prayer-city').addEventListener('change', e => {
 });
 $('#prayer-gps').addEventListener('click', () => {
   const btn = $('#prayer-gps');
+  const reset = () => { btn.disabled = false; btn.style.opacity = ''; btn.innerHTML = GPS_ICON + ' تحديد موقعي تلقائياً'; };
   btn.disabled = true;
   btn.style.opacity = '.6';
   btn.textContent = 'جارٍ تحديد الموقع...';
   initAudio();
-  const done = (lat, lon, label) => {
-    pMode = 'gps'; pLat = lat; pLon = lon; pGeoLabel = '';
-    $('#plat').value = lat.toFixed(4); $('#plon').value = lon.toFixed(4);
-    $('#prayer-city').value = '';
-    savePrayer(); computePrayer(); renderPrayer();
-    updateLocStatus();
-    reverseGeocode(lat, lon, label);
+  const done = (lat, lon, label, iana, cc) => {
+    applyGeo(lat, lon, label, iana, cc);
     toast(label);
-    btn.disabled = false; btn.style.opacity = '';
-    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg> تحديد موقعي تلقائياً';
+    reset();
   };
   const gpsFail = err => {
     const msg = err && err.code === 1 ? 'تم رفض إذن الموقع، جارٍ التحديد بالإنترنت...'
@@ -2274,24 +2370,25 @@ $('#prayer-gps').addEventListener('click', () => {
     toast(msg);
     ipLocate(done, () => {
       toast('تعذر تحديد الموقع - اختر مدينتك من القائمة أو أدخل الإحداثيات يدوياً');
-      btn.disabled = false; btn.style.opacity = '';
-      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg> تحديد موقعي تلقائياً';
+      reset();
     });
   };
   if (!navigator.geolocation){ gpsFail({code:2}); return; }
   navigator.geolocation.getCurrentPosition(
-    pos => done(pos.coords.latitude, pos.coords.longitude, 'تم تحديد موقعك بدقة'),
+    pos => {
+      const lat = pos.coords.latitude, lon = pos.coords.longitude;
+      timeZoneForCoords(lat, lon, iana => done(lat, lon, 'تم تحديد موقعك بدقة', iana, ''));
+    },
     gpsFail,
-    {enableHighAccuracy: false, timeout: 8000, maximumAge: 60000}
+    {enableHighAccuracy: true, timeout: 12000, maximumAge: 0}
   );
 });
 function ipLocate(done, fail){
   const providers = [
-    {url:'https://ipapi.co/json/', lat:'latitude', lon:'longitude'},
-    {url:'https://ipwho.is/', lat:'latitude', lon:'longitude'},
-    {url:'https://ipinfo.io/json', lat:'loc', lon:'loc'},
-    {url:'http://ip-api.com/json/', lat:'lat', lon:'lon'},
-    {url:'https://api.bigdatacloud.net/data/client-ip-with-confidence', lat:'latitude', lon:'longitude'}
+    {url:'https://ipwho.is/', get:d => ({lat:+d.latitude, lon:+d.longitude, iana:(d.timezone && d.timezone.id) || '', cc:d.country_code || ''})},
+    {url:'https://ipapi.co/json/', get:d => ({lat:+d.latitude, lon:+d.longitude, iana:d.timezone || '', cc:d.country_code || ''})},
+    {url:'https://get.geojs.io/v1/ip/geo.json', get:d => ({lat:+d.latitude, lon:+d.longitude, iana:d.timezone || '', cc:d.country_code || ''})},
+    {url:'https://ipinfo.io/json', get:d => { const p = (d.loc || '').split(','); return {lat:+p[0], lon:+p[1], iana:d.timezone || '', cc:d.country || ''}; }}
   ];
   let i = 0;
   const tryNext = () => {
@@ -2299,17 +2396,13 @@ function ipLocate(done, fail){
     const p = providers[i++];
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), 7000);
-    fetch(p.url, {signal: ctl.signal})
+    fetch(p.url, {signal: ctl.signal, cache:'no-store'})
       .then(r => r.json())
       .then(d => {
-        let lat, lon;
-        if (p.lat === 'loc'){
-          const parts = (d.loc || '').split(',');
-          lat = +parts[0]; lon = +parts[1];
-        } else { lat = +d[p.lat]; lon = +d[p.lon]; }
-        if (isFinite(lat) && isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180){
+        const g = p.get(d) || {};
+        if (isFinite(g.lat) && isFinite(g.lon) && Math.abs(g.lat) <= 90 && Math.abs(g.lon) <= 180 && !(g.lat === 0 && g.lon === 0)){
           clearTimeout(timer);
-          done(lat, lon, 'تم تحديد موقعك تقريبياً عبر الإنترنت');
+          done(g.lat, g.lon, 'تم تحديد موقعك تقريبياً عبر الإنترنت', g.iana, g.cc);
         } else throw new Error('bad');
       })
       .catch(() => { clearTimeout(timer); tryNext(); });
@@ -2319,8 +2412,10 @@ function ipLocate(done, fail){
 $('#prayer-apply').addEventListener('click', () => {
   const lat = +$('#plat').value, lon = +$('#plon').value;
   if (!isFinite(lat) || !isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180){ toast('أدخل إحداثيات صحيحة'); return; }
-  pMode = 'manual'; pLat = lat; pLon = lon;
+  pMode = 'manual'; pLat = lat; pLon = lon; pGeoLabel = '';
   $('#prayer-city').value = '';
+  timeZoneForCoords(lat, lon, iana => { if (iana) pGeoIana = iana; savePrayer(); computePrayer(); renderPrayer(); updateLocStatus(); });
+  reverseGeocode(lat, lon, 'تم تطبيق الإحداثيات');
   savePrayer(); computePrayer(); renderPrayer();
   toast('تم تطبيق الإحداثيات');
 });
@@ -2328,6 +2423,7 @@ $('#prayer-methods').addEventListener('click', e => {
   const chip = e.target.closest('.chip');
   if (!chip) return;
   pMethod = chip.dataset.m;
+  localStorage.setItem('moaqit_method_user', '1');
   savePrayer(); buildMethods(); computePrayer(); renderPrayer();
 });
 $('#azan-toggle').addEventListener('change', e => {

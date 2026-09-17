@@ -12,7 +12,7 @@ import android.os.Build;
 
 public class Notify {
 
-    public static final String CH_AZAN = "azan_high";
+    public static final String CH_AZAN = "azan_high_v2";
     public static final String CH_ALERTS = "prayer_alerts";
 
     public static void createChannels(Context c) {
@@ -25,7 +25,8 @@ public class Notify {
                     CH_AZAN, c.getString(R.string.ch_azan), NotificationManager.IMPORTANCE_HIGH);
             a.setDescription("تشغيل الأذان عند دخول وقت الصلاة");
             a.setSound(null, null);
-            a.enableVibration(true);
+            a.enableVibration(false);
+            try { a.setVibrationPattern(new long[]{0L}); } catch (Exception e) { }
             a.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
             nm.createNotificationChannel(a);
 

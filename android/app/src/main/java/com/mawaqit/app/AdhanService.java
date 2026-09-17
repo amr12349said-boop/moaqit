@@ -10,8 +10,6 @@ import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 
 /**
  * خدمة قدامية تشغّل صوت الأذان كاملاً حتى لو الشاشة مقفولة أو التطبيق في الخلفية.
@@ -75,18 +73,6 @@ public class AdhanService extends Service {
             });
             player.prepareAsync();
         } catch (Exception e) { }
-
-        try {
-            Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-            if (v != null) {
-                long[] pattern = new long[]{0, 600, 600, 600, 600, 800, 600, 1200};
-                if (Build.VERSION.SDK_INT >= 26) {
-                    v.vibrate(VibrationEffect.createWaveform(pattern, 0));
-                } else {
-                    v.vibrate(pattern, 0);
-                }
-            }
-        } catch (Exception e) { }
     }
 
     private void stopPlay() {
@@ -99,10 +85,6 @@ public class AdhanService extends Service {
             } catch (Exception e) { }
             player = null;
         }
-        try {
-            Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-            if (v != null) v.cancel();
-        } catch (Exception e) { }
     }
 
     @Override
