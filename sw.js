@@ -1,4 +1,4 @@
-const CACHE = 'moaqit-v5';
+const CACHE = 'moaqit-v6';
 const ASSETS = [
   './', './index.html', './world.js', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './icon-maskable-512.png',

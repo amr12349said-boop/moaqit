@@ -186,9 +186,7 @@ function updateWorldTimes(force){
     if (!it) continue;
     const p = tzParts(it.tz);
     const wt = card.querySelector('.wtime');
-    const str = app.fmt(p.h12) + ':' + app.fmt(p.m) + ' ' + p.ampm;
-    if (app.setAnimated) app.setAnimated(wt, str);
-    else wt.textContent = str;
+    wt.textContent = app.fmt(p.h12) + ':' + app.fmt(p.m) + ' ' + p.ampm;
     if (!card.dataset.off){
       card.dataset.off = tzOffsetMinutes(it.tz);
       card.querySelector('.woffset').textContent = offsetStr(+card.dataset.off);

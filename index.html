@@ -158,7 +158,7 @@ section.active{display:block}
 .clock-digits, #timer-display, #sw-display, #prayer-countdown, .wtime{direction:ltr}
 .tseg{display:inline-flex;align-items:center;justify-content:center;position:relative;min-width:calc(1ch + 6px);height:1em;text-align:center;line-height:1;vertical-align:middle;border-radius:10%;background:linear-gradient(180deg,#2a1f08 0%,#0d0903 50%,#1a1205 100%);border:2px solid #a97c2d;box-shadow:0 0 12px rgba(212,175,55,.16),inset 0 0 12px rgba(212,175,55,.07);transform-style:preserve-3d;overflow:hidden}
 .tseg::after{content:'';position:absolute;left:0;top:50%;width:100%;height:2px;background:rgba(0,0,0,.8);box-shadow:0 1px 0 rgba(212,175,55,.1);z-index:5;pointer-events:none}
-.tseg-num{position:absolute;top:0;inset-inline:0;height:100%;display:flex;align-items:center;justify-content:center;line-height:1;font-weight:900;background:linear-gradient(180deg,#f9efd4 0%,#ead6a0 35%,#c6a04e 70%,#f0dfb0 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;color:transparent;filter:drop-shadow(0 0 8px rgba(212,175,55,.4));z-index:2}
+.tseg-num{position:absolute;top:0;left:0;right:0;inset-inline:0;height:100%;display:flex;align-items:center;justify-content:center;line-height:1;font-weight:900;background:linear-gradient(180deg,#f9efd4 0%,#ead6a0 35%,#c6a04e 70%,#f0dfb0 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;color:transparent;filter:drop-shadow(0 0 8px rgba(212,175,55,.4));z-index:2}
 .tseg-num.flip-anim{height:50%;top:0;overflow:hidden;z-index:4;transform-origin:center bottom;backface-visibility:hidden;animation:flipAnim .6s ease-in-out forwards}
 .flipnum{position:absolute;left:0;top:0;width:100%;height:200%;display:flex;align-items:center;justify-content:center;line-height:1;font-weight:900;background:linear-gradient(180deg,#f9efd4 0%,#ead6a0 35%,#c6a04e 70%,#f0dfb0 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;color:transparent;filter:drop-shadow(0 0 8px rgba(212,175,55,.4))}
 @keyframes flipAnim{0%{transform:rotateX(0deg)}50%{transform:rotateX(-90deg)}100%{transform:rotateX(-180deg);opacity:0}}
@@ -1068,7 +1068,7 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
   <button id="floating-qibla" title="اتجاه القبلة"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v3M4.2 7l2.1 2.1M19.8 7l-2.1 2.1"/><line x1="12" y1="21" x2="12" y2="12"/><path d="M9 21h6"/></svg></button>
   <button id="floating-notify" title="تفعيل الإشعارات"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 21a2 2 0 0 0 3.4 0"/></svg></button>
   <button id="floating-bed" title="ساعة السرير"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.4 5.4 0 0 1-3.9 1.9 5.4 5.4 0 0 1-5.4-5.4c0-1.5.61-2.85 1.6-3.84A9.3 9.3 0 0 0 12 3z"/></svg></button>
-  <footer><span>مواقيت احترافي - الإصدار 3.5 - جميع الأوقات معروضة بتوقيت مكة المكرمة</span><div class="settings-bar"><button class="btn btn-ghost" id="settings-export" style="font-size:.72rem;padding:5px 10px">تصدير الإعدادات</button><button class="btn btn-ghost" id="settings-import-btn" style="font-size:.72rem;padding:5px 10px">استيراد الإعدادات</button><input type="file" id="settings-import" accept="application/json,.json" style="display:none"></div>
+  <footer><span>مواقيت احترافي - الإصدار 3.6 - جميع الأوقات معروضة بتوقيت مكة المكرمة</span><div class="settings-bar"><button class="btn btn-ghost" id="settings-export" style="font-size:.72rem;padding:5px 10px">تصدير الإعدادات</button><button class="btn btn-ghost" id="settings-import-btn" style="font-size:.72rem;padding:5px 10px">استيراد الإعدادات</button><input type="file" id="settings-import" accept="application/json,.json" style="display:none"></div>
   </footer>
 </div>
 
@@ -1117,9 +1117,8 @@ function tsegCell(ch){
   a.textContent = ch;
   const b = document.createElement('span');
   b.className = 'tseg-num';
-  b.textContent = ch;
+  b.textContent = '';
   wrap.appendChild(a); wrap.appendChild(b);
-  wrap._cur = 0;
   return wrap;
 }
 function tdotCell(){
@@ -1153,27 +1152,24 @@ function setAnimated(el, value){
   for (let i = 0; i < s.length; i++){
     if (s[i] === ':') continue;
     const cell = el.children[i];
-    const cur = cell.children[cell._cur];
-    const alt = cell.children[1 - cell._cur];
-    if (cur.textContent === s[i]) continue;
+    const cur = cell.children[0];
+    const alt = cell.children[1];
+    if (cur.textContent === s[i] && !cell._busy) continue;
     clearTimeout(cell._t);
-    if (rapid || cell._busy || cur.textContent === ' ' || cur.textContent === ''){
+    const oldVal = cur.textContent;
+    if (rapid || cell._busy || oldVal === ' ' || oldVal === ''){
       cur.textContent = s[i];
       alt.innerHTML = '';
-      alt.textContent = s[i];
       alt.classList.remove('flip-anim');
       cell._busy = false;
       continue;
     }
-    const oldVal = cur.textContent;
-    const newVal = s[i];
     alt.innerHTML = '';
     const inner = document.createElement('span');
     inner.className = 'flipnum';
     inner.textContent = oldVal;
     alt.appendChild(inner);
-    cur.textContent = newVal;
-    cell._cur = 1 - cell._cur;
+    cur.textContent = s[i];
     void cell.offsetWidth;
     alt.classList.add('flip-anim');
     cell._busy = true;
@@ -1181,7 +1177,6 @@ function setAnimated(el, value){
     c._t = setTimeout(() => {
       alt.classList.remove('flip-anim');
       alt.innerHTML = '';
-      alt.textContent = newVal;
       c._busy = false;
       el._doneAt = performance.now();
     }, 650);
@@ -1773,7 +1768,7 @@ function tickClock(){
   const d = new Date();
   $('#clock-date').textContent = new Intl.DateTimeFormat('ar-EG-u-nu-' + numSystem(), {timeZone: currentTZ(), weekday:'long', day:'numeric', month:'long', year:'numeric'}).format(d);
   try {
-    $('#clock-hijri').textContent = 'هـ ' + new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura-u-nu-' + numSystem(), {timeZone: currentTZ(), day:'numeric', month:'long', year:'numeric'}).format(d);
+    $('#clock-hijri').textContent = 'هـ ' + new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura-nu-' + numSystem(), {timeZone: currentTZ(), day:'numeric', month:'long', year:'numeric'}).format(d);
   } catch(e){ $('#clock-hijri').textContent = ''; }
   const sec = h12*3600 + m*60 + s;
   $('#s-hand').setAttribute('transform', 'rotate(' + (s*6) + ' 105 105)');
