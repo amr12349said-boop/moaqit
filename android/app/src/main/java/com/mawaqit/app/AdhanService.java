@@ -62,13 +62,19 @@ public class AdhanService extends Service {
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .build();
             player.setAudioAttributes(attrs);
-            player.setLooping(true);
+            player.setLooping(false);
             player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
                     try {
                         mp.start();
                     } catch (Exception e) { }
+                }
+            });
+            player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    stopSelf();
                 }
             });
             player.prepareAsync();
