@@ -195,12 +195,12 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public int getVersionCode() {
-            try { return BuildConfig.VERSION_CODE; } catch (Throwable t) { return 0; }
+            try { return getPackageManager().getPackageInfo(getPackageName(), 0).versionCode; } catch (Throwable t) { return 0; }
         }
 
         @JavascriptInterface
         public String getVersionName() {
-            try { return BuildConfig.VERSION_NAME; } catch (Throwable t) { return ""; }
+            try { return getPackageManager().getPackageInfo(getPackageName(), 0).versionName; } catch (Throwable t) { return ""; }
         }
 
         @JavascriptInterface
