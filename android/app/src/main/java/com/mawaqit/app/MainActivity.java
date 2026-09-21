@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.Settings;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
@@ -21,7 +22,16 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import androidx.core.content.FileProvider;
 import androidx.webkit.WebViewAssetLoader;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class MainActivity extends Activity {
 
@@ -31,6 +41,7 @@ public class MainActivity extends Activity {
     private static final int REQ_NOTIF = 101;
     private static final int REQ_LOC = 102;
     private static final int REQ_FILE = 103;
+    private static final int REQ_INSTALL_SRC = 104;
 
     private static final String JS_CURRENT_TAB =
             "(function(){try{var t=document.querySelectorAll('.tab');for(var i=0;i<t.length;i++){" +
@@ -41,6 +52,9 @@ public class MainActivity extends Activity {
     private GeolocationPermissions.Callback geoCallback;
     private String geoOrigin;
     private ValueCallback<Uri[]> filePathCallback;
+    private volatile boolean updaterRunning = false;
+    private volatile boolean updaterCancel = false;
+    private String pendingUpdateUrl = null;
 
     @Override
     protected void onCreate(Bundle state) {
@@ -178,6 +192,181 @@ public class MainActivity extends Activity {
                 }
             });
         }
+
+        @JavascriptInterface
+        public int getVersionCode() {
+            try { return BuildConfig.VERSION_CODE; } catch (Throwable t) { return 0; }
+        }
+
+        @JavascriptInterface
+        public String getVersionName() {
+            try { return BuildConfig.VERSION_NAME; } catch (Throwable t) { return ""; }
+        }
+
+        @JavascriptInterface
+        public void installUpdate(String url) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    startUpdate(url);
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void cancelUpdate() {
+            updaterCancel = true;
+            updaterRunning = false;
+            pendingUpdateUrl = null;
+        }
+    }
+
+    private void startUpdate(String url) {
+        try {
+            if (updaterRunning) { toastUpdater("التحميل جاري بالفعل..."); return; }
+            if (url == null || url.isEmpty()) { toastUpdater("رابط التحديث غير صالح"); return; }
+            if (Build.VERSION.SDK_INT >= 26 && !getPackageManager().canRequestPackageInstalls()) {
+                pendingUpdateUrl = url;
+                try {
+                    Intent i = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                            Uri.parse("package:" + getPackageName()));
+                    startActivityForResult(i, REQ_INSTALL_SRC);
+                } catch (Exception e) {
+                    pendingUpdateUrl = null;
+                    startDownload(url);
+                }
+            } else {
+                startDownload(url);
+            }
+        } catch (Exception e) {
+            toastUpdater("تعذر بدء التحديث");
+        }
+    }
+
+    private void startDownload(final String url) {
+        updaterRunning = true;
+        updaterCancel = false;
+        eval("try{if(window.MawaqitAdhan)window.MawaqitAdhan.updateState({state:'downloading',pct:0,msg:''})}catch(e){}");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                InputStream in = null;
+                OutputStream os = null;
+                HttpURLConnection conn = null;
+                File out = null;
+                try {
+                    final File dir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+                    if (dir == null) throw new Exception("نو-دير");
+                    if (!dir.exists()) dir.mkdirs();
+                    final File tmp = new File(dir, "mawaqit-update.apk.part");
+                    out = new File(dir, "mawaqit-update.apk");
+
+                    URL u = new URL(url);
+                    conn = openConn(u, url);
+                    for (int hop = 0; hop < 5; hop++) {
+                        int code = conn.getResponseCode();
+                        if (code == 200) break;
+                        if (code >= 300 && code < 400) {
+                            String loc = conn.getHeaderField("Location");
+                            if (loc == null) throw new Exception("لا-يوجد-رابط-تحويل");
+                            conn.disconnect();
+                            u = new URL(new URL(url), loc);
+                            conn = openConn(u, url);
+                        } else {
+                            throw new Exception("رمز-http-" + code);
+                        }
+                    }
+
+                    long total = conn.getContentLengthLong();
+                    in = new BufferedInputStream(conn.getInputStream());
+                    os = new FileOutputStream(tmp);
+                    byte[] buf = new byte[16384];
+                    long done = 0;
+                    int n, lastPct = -1;
+                    while ((n = in.read(buf)) > 0) {
+                        if (updaterCancel) {
+                            os.close(); os = null; in.close(); in = null;
+                            tmp.delete();
+                            updaterRunning = false;
+                            eval("try{if(window.MawaqitAdhan)window.MawaqitAdhan.updateState({state:'idle',pct:0,msg:''})}catch(e){}");
+                            return;
+                        }
+                        os.write(buf, 0, n);
+                        done += n;
+                        if (total > 0) {
+                            int pct = (int) Math.min(99, done * 100 / total);
+                            if (pct != lastPct) {
+                                lastPct = pct;
+                                final int fp = pct;
+                                eval("try{if(window.MawaqitAdhan)window.MawaqitAdhan.updateState({state:'downloading',pct:" + fp + ",msg:''})}catch(e){}");
+                            }
+                        }
+                    }
+                    os.flush(); os.close(); os = null;
+                    in.close(); in = null;
+                    if (tmp.renameTo(out)) tmp.delete();
+                    else out = tmp;
+                    updaterRunning = false;
+                    final File apk = out;
+                    eval("try{if(window.MawaqitAdhan)window.MawaqitAdhan.updateState({state:'ready',pct:100,msg:''})}catch(e){}");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            startInstall(apk);
+                        }
+                    });
+                } catch (final Exception e) {
+                    updaterRunning = false;
+                    eval("try{if(window.MawaqitAdhan)window.MawaqitAdhan.updateState({state:'error',pct:0,msg:'" + jsq(e.getMessage()) + "'})}catch(x){}");
+                } finally {
+                    try { if (in != null) in.close(); } catch (Exception e) { }
+                    try { if (os != null) os.close(); } catch (Exception e) { }
+                    try { if (conn != null) conn.disconnect(); } catch (Exception e) { }
+                }
+            }
+        }).start();
+    }
+
+    private HttpURLConnection openConn(URL u, String base) throws Exception {
+        HttpURLConnection c = (HttpURLConnection) u.openConnection();
+        c.setConnectTimeout(15000);
+        c.setReadTimeout(30000);
+        c.setInstanceFollowRedirects(false);
+        c.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 12) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36");
+        c.setRequestProperty("Accept", "application/vnd.android.package-archive,*/*");
+        c.connect();
+        return c;
+    }
+
+    private void startInstall(File apk) {
+        try {
+            Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", apk);
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setDataAndType(uri, "application/vnd.android.package-archive");
+            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            try { i.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true); } catch (Exception e) { }
+            startActivity(i);
+        } catch (Exception e) {
+            toastUpdater("تعذر فتح شاشة التثبيت — افتح صفحة التحميل يدوياً");
+            eval("try{if(window.MawaqitAdhan)window.MawaqitAdhan.updateState({state:'error',pct:0,msg:'install-failed'})}catch(x){}");
+        }
+    }
+
+    private static String jsq(String s) {
+        if (s == null) return "";
+        return s.replace("\\", "\\\\").replace("'", "\\'").replace("\n", " ").replace("\r", " ");
+    }
+
+    private void toastUpdater(final String msg) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    android.widget.Toast.makeText(MainActivity.this, msg, android.widget.Toast.LENGTH_LONG).show();
+                } catch (Exception e) { }
+            }
+        });
     }
 
     private void askNotifPermission() {
@@ -204,6 +393,17 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQ_INSTALL_SRC) {
+            String pending = pendingUpdateUrl;
+            pendingUpdateUrl = null;
+            if (Build.VERSION.SDK_INT >= 26 && getPackageManager().canRequestPackageInstalls()) {
+                if (pending != null && !pending.isEmpty()) startDownload(pending);
+                else toastUpdater("تم منح الإذن — اضغط التحديث مجدداً");
+            } else {
+                toastUpdater("لم يتم منح إذن التثبيت من مصادر خارجية");
+            }
+            return;
+        }
         if (requestCode == REQ_FILE) {
             if (filePathCallback == null) return;
             Uri[] results = null;

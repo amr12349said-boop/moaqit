@@ -609,6 +609,16 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
 #hijri-grid .cal-day.today{background:var(--gold);color:#171310}
 #hijri-grid .cal-day.white{color:var(--gold2)}
 .settings-bar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;justify-content:center}
+.upd-overlay{position:fixed;inset:0;z-index:210;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);padding:20px}
+.upd-overlay.active{display:flex}
+.upd-box{background:var(--bg2);border:1px solid var(--border);border-radius:16px;width:min(94vw,400px);padding:20px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.45)}
+.upd-box h3{margin:0 0 10px;color:var(--gold);font-size:1.15rem}
+.upd-txt{color:var(--muted);font-size:.9rem;font-weight:600;line-height:1.8;margin:0;white-space:pre-line}
+.upd-bar{height:9px;border-radius:10px;background:rgba(255,255,255,.1);overflow:hidden;margin:14px 0 6px;display:none}
+.upd-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--gold2),var(--gold));border-radius:10px;transition:width .3s}
+.upd-pct{display:none;color:var(--muted);font-size:.8rem;font-weight:700}
+.upd-actions{display:flex;gap:10px;justify-content:center;margin-top:16px}
+.upd-actions .btn{flex:1}
 .ahour{font-size:16px;fill:var(--gold);font-weight:800;text-anchor:middle;dominant-baseline:middle;pointer-events:none}
 </style>
 <meta name="theme-color" content="#0a0f1a">
@@ -1068,7 +1078,7 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
   <button id="floating-qibla" title="اتجاه القبلة"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v3M4.2 7l2.1 2.1M19.8 7l-2.1 2.1"/><line x1="12" y1="21" x2="12" y2="12"/><path d="M9 21h6"/></svg></button>
   <button id="floating-notify" title="تفعيل الإشعارات"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 21a2 2 0 0 0 3.4 0"/></svg></button>
   <button id="floating-bed" title="ساعة السرير"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.4 5.4 0 0 1-3.9 1.9 5.4 5.4 0 0 1-5.4-5.4c0-1.5.61-2.85 1.6-3.84A9.3 9.3 0 0 0 12 3z"/></svg></button>
-  <footer><span>مواقيت احترافي - الإصدار 3.7 - جميع الأوقات معروضة بتوقيت مكة المكرمة</span><div class="settings-bar"><button class="btn btn-ghost" id="settings-export" style="font-size:.72rem;padding:5px 10px">تصدير الإعدادات</button><button class="btn btn-ghost" id="settings-import-btn" style="font-size:.72rem;padding:5px 10px">استيراد الإعدادات</button><input type="file" id="settings-import" accept="application/json,.json" style="display:none"></div>
+  <footer><span>مواقيت احترافي - الإصدار 3.8 - جميع الأوقات معروضة بتوقيت مكة المكرمة</span><div class="settings-bar"><button class="btn btn-ghost" id="settings-update" style="font-size:.72rem;padding:5px 10px;border-color:var(--gold);color:var(--gold)">فحص التحديثات</button><button class="btn btn-ghost" id="settings-export" style="font-size:.72rem;padding:5px 10px">تصدير الإعدادات</button><button class="btn btn-ghost" id="settings-import-btn" style="font-size:.72rem;padding:5px 10px">استيراد الإعدادات</button><input type="file" id="settings-import" accept="application/json,.json" style="display:none"></div>
   </footer>
 </div>
 
@@ -3044,6 +3054,106 @@ function checkPrayerNotifications(){
     }
   } catch(e){}
 }
+/* ==================== التحديث الداخلي ==================== */
+const APP_INFO = { name: '3.8', code: 11, apk: 'https://github.com/amr12349said-boop/moaqit/releases/latest/download/mawaqit.apk' };
+const UPDATE_JSON_URL = 'https://amr12349said-boop.github.io/moaqit/version.json';
+const UPD_CHECK_INTERVAL = 86400000;
+let updateInfo = null;
+
+function buildUpdUI(){
+  try {
+    if (document.getElementById('upd-overlay')) return;
+    const ov = document.createElement('div');
+    ov.id = 'upd-overlay';
+    ov.className = 'upd-overlay';
+    ov.innerHTML =
+      '<div class="upd-box">' +
+        '<h3 id="upd-title">تحديث جديد متاح</h3>' +
+        '<p id="upd-txt" class="upd-txt"></p>' +
+        '<div class="upd-bar"><div id="upd-bar-fill" class="upd-bar-fill"></div></div>' +
+        '<div id="upd-pct" class="upd-pct"></div>' +
+        '<div class="upd-actions">' +
+          '<button id="upd-do" class="btn btn-gold">تحديث الآن</button>' +
+          '<button id="upd-later" class="btn btn-ghost">لاحقاً</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(ov);
+    document.getElementById('upd-do').addEventListener('click', updDo);
+    document.getElementById('upd-later').addEventListener('click', updClose);
+  } catch(e){}
+}
+function updClose(){
+  try { const ov = document.getElementById('upd-overlay'); if (ov) ov.classList.remove('active'); } catch(e){}
+}
+function updShow(title, txt, phase, pct, actionLabel, actionFn){
+  try {
+    buildUpdUI();
+    document.getElementById('upd-title').textContent = title;
+    document.getElementById('upd-txt').textContent = txt;
+    const bar = document.querySelector('#upd-overlay .upd-bar');
+    const pctEl = document.getElementById('upd-pct');
+    const fill = document.getElementById('upd-bar-fill');
+    const btn = document.getElementById('upd-do');
+    if (phase === 'downloading'){
+      if (bar) bar.style.display = 'block';
+      if (pctEl){ pctEl.style.display = 'block'; pctEl.textContent = Math.round(pct || 0) + '٪'; }
+      if (fill) fill.style.width = (pct || 0) + '%';
+    } else {
+      if (bar) bar.style.display = 'none';
+      if (pctEl) pctEl.style.display = 'none';
+    }
+    btn.textContent = actionLabel || 'حسناً';
+    btn.onclick = actionFn || updClose;
+    const ov = document.getElementById('upd-overlay');
+    if (ov && !ov.classList.contains('active')) ov.classList.add('active');
+  } catch(e){}
+}
+function checkUpdate(manual){
+  try {
+    buildUpdUI();
+    const last = parseInt(localStorage.getItem('moaqit_upd_check') || '0', 10) || 0;
+    if (!manual && last && (Date.now() - last) < UPD_CHECK_INTERVAL) return;
+    fetch(UPDATE_JSON_URL + '?t=' + Date.now(), { cache: 'no-store' })
+      .then(r => { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+      .then(j => {
+        try { localStorage.setItem('moaqit_upd_check', String(Date.now())); } catch(e){}
+        const rc = parseInt(j.code, 10) || 0;
+        if (rc > APP_INFO.code){
+          updateInfo = j;
+          const sizeMB = parseInt(j.size, 10) ? Math.ceil(parseInt(j.size, 10) / 1048576) : 0;
+          updShow('تحديث جديد متاح', 'النسخة الجديدة: ' + (j.name || rc) + '\n(الحالية: ' + APP_INFO.name + ')' + (sizeMB ? ' — الحجم حوالي ' + sizeMB + ' م.ب' : '') + '\nاضغط "تحديث الآن" وسيتم التحميل والتثبيت داخل التطبيق.', 'idle', 0, 'تحديث الآن', updDo);
+        } else if (manual) toast('لا توجد نسخة أحدث — أنت على آخر إصدار (' + APP_INFO.name + ')');
+      })
+      .catch(() => { if (manual) toast('تعذر التحقق من التحديثات، تأكد من اتصالك بالإنترنت'); });
+  } catch(e){}
+}
+function updDo(){
+  try {
+    if (!updateInfo) return;
+    const nb = nativeBridge();
+    if (nb && typeof nb.installUpdate === 'function'){
+      const sizeMB = parseInt(updateInfo.size, 10) ? Math.ceil(parseInt(updateInfo.size, 10) / 1048576) : 0;
+      updShow('جاري التحميل', 'يتم الآن تحميل النسخة الجديدة...' + (sizeMB ? '\nالحجم حوالي ' + sizeMB + ' م.ب' : ''), 'downloading', 0, 'إلغاء', updCancel);
+      try { nb.installUpdate(updateInfo.apk || APP_INFO.apk); } catch(e){}
+      return;
+    }
+    try { window.open(updateInfo.page || APP_INFO.apk, '_blank'); } catch(e){}
+    updClose();
+  } catch(e){}
+}
+function updCancel(){
+  try { const nb = nativeBridge(); if (nb && typeof nb.cancelUpdate === 'function') nb.cancelUpdate(); } catch(e){}
+  updClose();
+}
+function updateState(st){
+  try {
+    if (!st) return;
+    const s = String(st.state || '');
+    if (s === 'downloading' || s === 'download') updShow('جاري التحميل', 'يتم الآن تحميل النسخة الجديدة...', 'downloading', st.pct || 0, 'إلغاء', updCancel);
+    else if (s === 'ready') updShow('اكتمل التحميل', 'تم تحميل النسخة الجديدة بنجاح.\nسيتم فتح شاشة التثبيت الآن لاستكمال التحديث.', 'idle', 100, 'تم', updClose);
+    else if (s === 'error') updShow('تعذر التحديث', 'حدث خطأ أثناء التحميل: ' + (st.msg || 'خطأ في الاتصال') + '\nحاول مرة أخرى.', 'idle', 0, 'إعادة المحاولة', updDo);
+  } catch(e){}
+}
 /* ==================== اختصارات لوحة المفاتيح ==================== */
 function goTab(n){
   const els = $('.tab');
@@ -3181,6 +3291,8 @@ function initSettings(){
   });
   const btn = $('#settings-import-btn');
   if (btn) btn.addEventListener('click', () => $('#settings-import').click());
+  const upd = $('#settings-update');
+  if (upd) upd.addEventListener('click', () => checkUpdate(true));
   const imp = $('#settings-import');
   if (imp) imp.addEventListener('change', e => {
     const file = e.target.files[0];
@@ -3217,6 +3329,7 @@ initFloating();
 watchCompass();
 setInterval(checkPrayerNotifications, 60000);
 setInterval(tickBedClock, 1000);
+setTimeout(() => { try { checkUpdate(false); } catch(e){ } }, 6000);
 
 setInterval(updatePrayerCountdown, 1000);
 renderAlarms();
@@ -3486,7 +3599,8 @@ const MAWAQIT_ADHAN = (function(){
     config: config, next: nextInfo, play: playAdhan, stop: stopAdhan, prayerStart: prayerStart,
     enable: function(){ return setEnabled(true); },
     disable: function(){ return setEnabled(false); },
-    setCity: setCity, setMethod: setMethod, hasHost: hasHost, send: hostSend
+    setCity: setCity, setMethod: setMethod, hasHost: hasHost, send: hostSend,
+    updateState: updateState, checkUpdate: checkUpdate, version: function(){ return APP_INFO; }
   };
 })();
 window.MawaqitAdhan = MAWAQIT_ADHAN;
