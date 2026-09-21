@@ -619,6 +619,14 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
 .upd-pct{display:none;color:var(--muted);font-size:.8rem;font-weight:700}
 .upd-actions{display:flex;gap:10px;justify-content:center;margin-top:16px}
 .upd-actions .btn{flex:1}
+.welcome-line{text-align:center;color:var(--gold);font-size:.85rem;font-weight:800;padding:8px 14px 0}
+#name-overlay{position:fixed;inset:0;z-index:230;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);padding:20px}
+#name-overlay.active{display:flex}
+.name-box{background:var(--bg2);border:1px solid var(--border);border-radius:16px;width:min(92vw,380px);padding:22px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.45)}
+.name-box h3{margin:0 0 8px;color:var(--gold);font-size:1.25rem}
+.name-box p{color:var(--muted);font-size:.85rem;font-weight:600;line-height:1.8;margin:0 0 16px}
+.name-box input{width:100%;box-sizing:border-box;background:var(--input-bg);color:var(--text);border:1px solid var(--card-border);border-radius:12px;padding:11px 14px;font-family:inherit;font-size:1rem;font-weight:700;text-align:center;margin-bottom:14px}
+.name-box input:focus{outline:none;border-color:var(--gold)}
 .ahour{font-size:16px;fill:var(--gold);font-weight:800;text-anchor:middle;dominant-baseline:middle;pointer-events:none}
 </style>
 <meta name="theme-color" content="#0a0f1a">
@@ -1074,11 +1082,21 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
     </div>
   </div>
 
+  <!-- ================= الترحيب عند أول استخدام ================= -->
+  <div id="name-overlay">
+    <div class="name-box">
+      <h3>مرحباً بك 👋</h3>
+      <p>هذه أول مرة تستخدم التطبيق.<br>اكتب اسمك فقط لنبدأ.</p>
+      <input id="name-input" type="text" maxlength="30" placeholder="اكتب اسمك هنا" autocomplete="off">
+      <button id="name-save" class="btn btn-gold" style="width:100%">ابدأ</button>
+    </div>
+  </div>
+
   <!-- ================= أزرار عائمة ================= -->
   <button id="floating-qibla" title="اتجاه القبلة"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v3M4.2 7l2.1 2.1M19.8 7l-2.1 2.1"/><line x1="12" y1="21" x2="12" y2="12"/><path d="M9 21h6"/></svg></button>
   <button id="floating-notify" title="تفعيل الإشعارات"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 21a2 2 0 0 0 3.4 0"/></svg></button>
   <button id="floating-bed" title="ساعة السرير"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.4 5.4 0 0 1-3.9 1.9 5.4 5.4 0 0 1-5.4-5.4c0-1.5.61-2.85 1.6-3.84A9.3 9.3 0 0 0 12 3z"/></svg></button>
-  <footer><span>مواقيت احترافي - الإصدار 3.8 - جميع الأوقات معروضة بتوقيت مكة المكرمة</span><div class="settings-bar"><button class="btn btn-ghost" id="settings-update" style="font-size:.72rem;padding:5px 10px;border-color:var(--gold);color:var(--gold)">فحص التحديثات</button><button class="btn btn-ghost" id="settings-export" style="font-size:.72rem;padding:5px 10px">تصدير الإعدادات</button><button class="btn btn-ghost" id="settings-import-btn" style="font-size:.72rem;padding:5px 10px">استيراد الإعدادات</button><input type="file" id="settings-import" accept="application/json,.json" style="display:none"></div>
+  <footer><span>مواقيت احترافي - الإصدار 3.9 - جميع الأوقات معروضة بتوقيت مكة المكرمة</span><div class="settings-bar"><button class="btn btn-ghost" id="settings-update" style="font-size:.72rem;padding:5px 10px;border-color:var(--gold);color:var(--gold)">فحص التحديثات</button><button class="btn btn-ghost" id="settings-export" style="font-size:.72rem;padding:5px 10px">تصدير الإعدادات</button><button class="btn btn-ghost" id="settings-import-btn" style="font-size:.72rem;padding:5px 10px">استيراد الإعدادات</button><input type="file" id="settings-import" accept="application/json,.json" style="display:none"></div>
   </footer>
 </div>
 
@@ -3055,7 +3073,7 @@ function checkPrayerNotifications(){
   } catch(e){}
 }
 /* ==================== التحديث الداخلي ==================== */
-const APP_INFO = { name: '3.8', code: 11, apk: 'https://github.com/amr12349said-boop/moaqit/releases/latest/download/mawaqit.apk' };
+const APP_INFO = { name: '3.9', code: 12, apk: 'https://github.com/amr12349said-boop/moaqit/releases/latest/download/mawaqit.apk' };
 const UPDATE_JSON_URL = 'https://amr12349said-boop.github.io/moaqit/version.json';
 const UPD_CHECK_INTERVAL = 86400000;
 let updateInfo = null;
@@ -3152,6 +3170,63 @@ function updateState(st){
     if (s === 'downloading' || s === 'download') updShow('جاري التحميل', 'يتم الآن تحميل النسخة الجديدة...', 'downloading', st.pct || 0, 'إلغاء', updCancel);
     else if (s === 'ready') updShow('اكتمل التحميل', 'تم تحميل النسخة الجديدة بنجاح.\nسيتم فتح شاشة التثبيت الآن لاستكمال التحديث.', 'idle', 100, 'تم', updClose);
     else if (s === 'error') updShow('تعذر التحديث', 'حدث خطأ أثناء التحميل: ' + (st.msg || 'خطأ في الاتصال') + '\nحاول مرة أخرى.', 'idle', 0, 'إعادة المحاولة', updDo);
+  } catch(e){}
+}
+/* ==================== الترحيب عند أول استخدام ==================== */
+const NAME_KEY = 'moaqit_user_name';
+function initWelcome(){
+  try {
+    let name = '';
+    try { name = (localStorage.getItem(NAME_KEY) || '').trim(); } catch(e){}
+    applyUserName(name);
+    if (name) return;
+    const ov = document.getElementById('name-overlay');
+    if (!ov) return;
+    ov.classList.add('active');
+    wireNameForm(ov);
+    setTimeout(() => { try { const inp = document.getElementById('name-input'); if (inp) inp.focus(); } catch(e){} }, 350);
+  } catch(e){}
+}
+function wireNameForm(ov){
+  const inp = document.getElementById('name-input');
+  const btn = document.getElementById('name-save');
+  if (!inp || !btn || btn.__wired) return;
+  btn.__wired = true;
+  const done = () => {
+    try {
+      let v = (inp.value || '').trim();
+      if (!v){
+        inp.focus();
+        inp.style.borderColor = 'var(--red)';
+        toast('اكتب اسمك أولاً');
+        return;
+      }
+      if (v.length > 30) v = v.slice(0, 30);
+      try { localStorage.setItem(NAME_KEY, v); } catch(e){}
+      ov.classList.remove('active');
+      applyUserName(v);
+      toast('أهلاً يا ' + v + ' 🌙');
+    } catch(e){}
+  };
+  btn.addEventListener('click', done);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') done(); });
+}
+function applyUserName(name){
+  try {
+    let el = document.getElementById('welcome-line');
+    if (!name){
+      if (el) el.style.display = 'none';
+      return;
+    }
+    if (!el){
+      el = document.createElement('div');
+      el.id = 'welcome-line';
+      el.className = 'welcome-line';
+      const h = document.querySelector('header');
+      if (h && h.nextElementSibling) h.parentNode.insertBefore(el, h.nextElementSibling);
+    }
+    el.style.display = 'block';
+    el.textContent = 'أهلاً يا ' + name + ' 🌙';
   } catch(e){}
 }
 /* ==================== اختصارات لوحة المفاتيح ==================== */
@@ -3325,6 +3400,7 @@ initAlarmDays();
 initHijriCal();
 initShare();
 initSettings();
+initWelcome();
 initFloating();
 watchCompass();
 setInterval(checkPrayerNotifications, 60000);
