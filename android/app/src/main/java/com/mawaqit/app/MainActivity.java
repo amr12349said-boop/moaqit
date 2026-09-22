@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
+import android.view.KeyEvent;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
@@ -36,6 +37,7 @@ import java.net.URL;
 public class MainActivity extends Activity {
 
     public static volatile boolean foreground = false;
+    public static volatile boolean adhanRinging = false;
 
     private static final String HOME = "https://appassets.androidplatform.net/assets/index.html";
     private static final int REQ_NOTIF = 101;
@@ -448,6 +450,24 @@ public class MainActivity extends Activity {
                 } catch (Exception e) { }
             }
         });
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN && event.getRepeatCount() == 0) {
+            boolean stopping = false;
+            if (AdhanService.isRinging()) {
+                AdhanService.stop(this);
+                stopping = true;
+            }
+            if (adhanRinging) {
+                adhanRinging = false;
+                eval("try{ if(window.MawaqitAdhan) MawaqitAdhan.stop(); }catch(e){}");
+                stopping = true;
+            }
+            if (stopping) return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override

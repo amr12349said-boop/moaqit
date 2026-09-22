@@ -22,10 +22,15 @@ public class Router {
                 if (times != null) AlarmScheduler.schedule(ctx, times);
             }
 
+            if ("ring".equals(type)) {
+                MainActivity.adhanRinging = o.optBoolean("on", false);
+            }
+
             if ("prayerStart".equals(type)) {
                 boolean playedInApp = o.optBoolean("playedInApp", false);
                 boolean enabled = o.optBoolean("enabled", true);
                 if (!enabled) return;
+                MainActivity.adhanRinging = playedInApp;
                 if (MainActivity.foreground && playedInApp) return;
 
                 if (!MainActivity.foreground && web != null) {

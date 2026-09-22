@@ -16,8 +16,22 @@ import android.os.IBinder;
  */
 public class AdhanService extends Service {
 
+    public static final String ACTION_STOP = "com.mawaqit.app.ADHAN_STOP";
+    public static volatile boolean RINGING = false;
+
     private static final int NOTIF_ID = 4242;
     private MediaPlayer player;
+
+    public static boolean isRinging() { return RINGING; }
+
+    public static void stop(Context c) {
+        try {
+            Intent i = new Intent(c, AdhanService.class);
+            i.setAction(ACTION_STOP);
+            if (Build.VERSION.SDK_INT >= 26) c.startForegroundService(i);
+            else c.startService(i);
+        } catch (Exception e) { }
+    }
 
     public static void start(Context c, String key, String name) {
         try {
@@ -36,6 +50,13 @@ public class AdhanService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null && ACTION_STOP.equals(intent.getAction())) {
+            stopPlay();
+            RINGING = false;
+            try { stopForeground(true); } catch (Exception e) { }
+            stopSelf();
+            return START_NOT_STICKY;
+        }
         String name = (intent != null && intent.getStringExtra("name") != null)
                 ? intent.getStringExtra("name") : "الصلاة";
         Notification n = Notify.adhanPlaying(this, name);
@@ -68,12 +89,14 @@ public class AdhanService extends Service {
                 public void onPrepared(MediaPlayer mp) {
                     try {
                         mp.start();
+                        RINGING = true;
                     } catch (Exception e) { }
                 }
             });
             player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
+                    RINGING = false;
                     stopSelf();
                 }
             });
@@ -82,6 +105,7 @@ public class AdhanService extends Service {
     }
 
     private void stopPlay() {
+        RINGING = false;
         if (player != null) {
             try {
                 player.stop();

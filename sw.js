@@ -1,6 +1,6 @@
-const CACHE = 'moaqit-v6';
+const CACHE = 'moaqit-v7';
 const ASSETS = [
-  './', './index.html', './world.js', './manifest.webmanifest',
+  './', './index.html', './world.js', './quran-data.js', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './icon-maskable-512.png',
   './icon.svg', './favicon-32.png', './apple-touch-icon.png',
   './azan_nasser.mp3'
