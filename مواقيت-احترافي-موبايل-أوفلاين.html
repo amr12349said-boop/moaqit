@@ -498,6 +498,61 @@ section.active{display:block}
 }
 .manual-coords input:focus{outline:none;border-color:var(--gold)}
 #prayer-gps{display:flex;align-items:center;gap:8px;justify-content:center}
+
+/* ===== Drawer (قائمة ☰) ===== */
+section[id^="tab-"]{position:relative}
+.drawer-fab{
+  position:absolute;top:10px;inset-inline-start:10px;z-index:5;
+  width:38px;height:38px;border-radius:12px;border:1px solid var(--card-border);
+  background:var(--bg);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  color:var(--gold2);font-size:1.15rem;line-height:1;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.25);
+}
+.drawer-fab:active{transform:scale(.94)}
+.drawer-mask{
+  position:fixed;inset:0;z-index:59;background:rgba(0,0,0,.5);
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+  opacity:0;pointer-events:none;transition:opacity .25s ease;
+}
+body.drawer-open .drawer-mask{opacity:1;pointer-events:auto}
+.drawer{
+  position:fixed;inset-inline:0;bottom:0;z-index:60;max-height:82dvh;
+  background:var(--bg);border:1px solid var(--card-border);border-bottom:none;
+  border-radius:20px 20px 0 0;box-shadow:0 -8px 34px rgba(0,0,0,.45);
+  display:flex;flex-direction:column;
+  transform:translateY(106%);transition:transform .32s cubic-bezier(.32,.72,.36,1);
+}
+body.drawer-open .drawer{transform:translateY(0)}
+.drawer-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:14px 16px 12px;border-bottom:1px solid var(--card-border);
+}
+.drawer-head h3{margin:0;font-size:1.05rem;font-weight:900;color:var(--gold)}
+.drawer-close{
+  width:34px;height:34px;border-radius:10px;border:1px solid var(--card-border);
+  background:var(--subtle);color:var(--muted);font-size:1.05rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.drawer-body{overflow-y:auto;padding:14px 16px calc(16px + env(safe-area-inset-bottom));overscroll-behavior:contain}
+.drawer-body .card{margin-bottom:12px}
+.drawer-held{margin-bottom:14px}
+.drawer-group-title{
+  font-size:.78rem;font-weight:900;color:var(--muted);margin:2px 0 10px;
+  text-transform:uppercase;letter-spacing:.5px;
+}
+.drawer-status{display:flex;flex-direction:column;gap:8px}
+.ds-row{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:var(--subtle);border:1px solid var(--card-border);border-radius:12px;padding:10px 13px;
+}
+.ds-row span{font-size:.83rem;font-weight:700;color:var(--muted)}
+.ds-row b{font-size:.83rem;font-weight:800;color:var(--gold2)}
+.ds-row b.warn{color:#ff8f6b}
+.drawer-hint{font-size:.78rem;color:var(--muted);line-height:1.7;margin-top:10px}
+@media (min-width:940px){
+  .drawer{left:50%;right:auto;inset-inline:auto;transform:translate(-50%,106%);width:min(480px,96vw)}
+  body.drawer-open .drawer{transform:translate(-50%,0)}
+}
 .prayer-grid{display:grid;grid-template-columns:1fr;gap:9px}
 .prayer-item{
   display:flex;align-items:center;gap:12px;text-align:start;
@@ -776,10 +831,22 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
     </button>
   </nav>
 
+  <!-- ================= Drawer (قائمة ☰ الموحّدة) ================= -->
+  <div class="drawer-mask" id="drawer-mask"></div>
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <h3 id="drawer-title"></h3>
+      <button class="drawer-close" id="drawer-close" aria-label="إغلاق">✕</button>
+    </div>
+    <div class="drawer-body" id="drawer-body"></div>
+  </aside>
+
   <!-- ================= ساعة مكة ================= -->
   <section id="tab-clock" class="active">
+    <button class="drawer-fab" data-sec="clock" aria-label="الإعدادات">☰</button>
     <div class="card">
       <h2>الساعة الآن <span class="line"></span></h2>
+      <div class="dv" id="dv-clock" hidden>
       <div class="city-row">
         <div class="city-pick">
           <input type="text" id="city-search" placeholder="ابحث عن دولة أو مدينة... (مثال: مصر، دبي)">
@@ -795,6 +862,7 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
           </div>
           <span class="city-count" id="city-count"></span>
         </div>
+      </div>
       </div>
       <div class="clock-wrap">
         <div>
@@ -828,6 +896,7 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
 
   <!-- ================= المنبه ================= -->
   <section id="tab-alarm">
+    <button class="drawer-fab" data-sec="alarm" aria-label="الإعدادات">☰</button>
     <div class="card">
       <h2>إضافة منبه جديد <span class="line"></span></h2>
       <div class="form-grid">
@@ -859,6 +928,7 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
       <div id="alarm-list"><div class="empty">لا توجد منبهات بعد</div></div>
     </div>
 
+    <div class="dv" id="dv-alarm" hidden>
     <div class="card">
       <h2>النغمات والأجراس <span class="line"></span></h2>
       <p style="color:var(--muted);font-size:.85rem;font-weight:600;margin-bottom:12px">
@@ -877,13 +947,17 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
         <span class="vol-label" id="vol-val" style="min-width:34px;text-align:center">80%</span>
       </div>
     </div>
+    </div>
   </section>
 
   <!-- ================= المؤقت ================= -->
   <section id="tab-timer">
+    <button class="drawer-fab" data-sec="timer" aria-label="الإعدادات">☰</button>
     <div class="card">
       <h2>المؤقت التنازلي <span class="line"></span></h2>
+      <div class="dv" id="dv-timer" hidden>
       <div class="region-chips" id="timer-styles" style="justify-content:center;margin-bottom:16px"></div>
+      </div>
       <div class="timer-main">
         <div class="timer-bar"><div class="timer-bar-fill" id="timer-bar-fill"></div></div>
         <div class="timer-ring">
@@ -973,6 +1047,7 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
 
   <!-- ================= ساعة الإيقاف ================= -->
   <section id="tab-stopwatch">
+    <button class="drawer-fab" data-sec="stopwatch" aria-label="الإعدادات">☰</button>
     <div class="card">
       <h2>ساعة الإيقاف <span class="line"></span></h2>
       <div class="sw-display" id="sw-display">00:00.00</div>
@@ -991,6 +1066,7 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
 
   <!-- ================= توقيت العالم ================= -->
   <section id="tab-world">
+    <button class="drawer-fab" data-sec="world" aria-label="الإعدادات">☰</button>
     <div class="card">
       <h2>توقيتات دول العالم <span class="line"></span></h2>
       <div class="world-controls">
@@ -1017,9 +1093,12 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
 
   <!-- ================= مواقيت الصلاة ================= -->
   <section id="tab-prayer">
+    <button class="drawer-fab" data-sec="prayer" aria-label="الإعدادات">☰</button>
+    <div class="dv" data-dv="prayer" hidden>
     <div class="card">
       <h2>شكل عرض المواقيت <span class="line"></span></h2>
       <div class="region-chips" id="prayer-styles"></div>
+    </div>
     </div>
     <div class="card prayer-hero">
       <div class="ph-label">الصلاة القادمة</div>
@@ -1041,6 +1120,7 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
       </div>
     </div>
 
+    <div class="dv" data-dv="prayer" hidden>
     <div class="card">
       <h2>موقع الصلاة <span class="line"></span></h2>
       <div class="prayer-loc">
@@ -1054,8 +1134,13 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>
             تحديد موقعي تلقائياً
           </button>
-          <select id="prayer-city" style="flex:1;min-width:0"></select>
+          <button class="btn btn-ghost" id="prayer-relocate" title="أعد التحديد بعد السفر أو تغيّر المحافظة" style="white-space:nowrap">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>
+            إعادة التحديد
+          </button>
         </div>
+        <input type="search" id="prayer-city-filter" placeholder="ابحث عن مدينتك أو محافظتك..." style="width:100%;box-sizing:border-box;border:1px solid var(--card-border);border-radius:12px;background:var(--input-bg);color:var(--text);padding:9px 12px;font-family:inherit;font-size:.85rem;font-weight:600">
+        <select id="prayer-city" style="flex:1;min-width:0"></select>
         <div class="prayer-note" id="prayer-loc-status" style="text-align:start"></div>
       </div>
     </div>
@@ -1086,11 +1171,13 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
         <label class="switch"><input type="checkbox" id="azan-toggle"><span class="slider"></span></label>
       </div>
     </div>
+    </div>
   </section>
 
 
   <!-- ================= بوصلة القبلة ================= -->
   <section id="tab-qibla">
+    <button class="drawer-fab" data-sec="qibla" aria-label="الإعدادات">☰</button>
     <div class="card">
       <h2>بوصلة القبلة <span class="line"></span></h2>
       <div style="text-align:center;margin-bottom:12px">
@@ -1118,6 +1205,7 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
         <div id="qibla-dist" style="font-size:.85rem;color:var(--muted);margin-top:4px"></div>
       </div>
       <div class="form-grid" style="margin-top:14px">
+      <div class="dv" data-dv="qibla" hidden>
         <div class="field">
           <label>خط العرض</label>
           <input type="number" id="qibla-lat" step="any" placeholder="21.4225">
@@ -1131,13 +1219,16 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
           <button class="btn btn-gold" id="qibla-apply" style="width:100%">حساب الاتجاه</button>
         </div>
       </div>
+      </div>
     </div>
   </section>
 
   <!-- ================= السبحة ================= -->
   <section id="tab-tasbih">
+    <button class="drawer-fab" data-sec="tasbih" aria-label="الإعدادات">☰</button>
     <div class="card">
       <h2>السبحة <span class="line"></span></h2>
+      <div class="dv" data-dv="tasbih" hidden>
       <div class="tb-styles" id="tb-styles">
         <button class="chip sel" data-s="classic">🌙 كلاسيكي</button>
         <button class="chip" data-s="modern">✨ عصري</button>
@@ -1155,12 +1246,14 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
           <button class="chip" data-t="0">بلا هدف</button>
         </div>
       </div>
+      </div>
       <button class="btn btn-gold tb-btn" id="tb-reset">إعادة العدّ من جديد</button>
     </div>
   </section>
 
   <!-- ================= المصحف ================= -->
   <section id="tab-quran">
+    <button class="drawer-fab" data-sec="quran" aria-label="الإعدادات">☰</button>
     <div class="card" id="quran-list">
       <h2>المصحف الشريف <span class="line"></span></h2>
       <div class="quran-tools">
@@ -1219,7 +1312,7 @@ footer{text-align:center;color:var(--foot);font-size:.75rem;font-weight:600;marg
   <button id="floating-qibla" title="اتجاه القبلة"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v3M4.2 7l2.1 2.1M19.8 7l-2.1 2.1"/><line x1="12" y1="21" x2="12" y2="12"/><path d="M9 21h6"/></svg></button>
   <button id="floating-notify" title="تفعيل الإشعارات"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 21a2 2 0 0 0 3.4 0"/></svg></button>
   <button id="floating-bed" title="ساعة السرير"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.4 5.4 0 0 1-3.9 1.9 5.4 5.4 0 0 1-5.4-5.4c0-1.5.61-2.85 1.6-3.84A9.3 9.3 0 0 0 12 3z"/></svg></button>
-  <footer><span>مواقيت احترافي - الإصدار 3.10 - جميع الأوقات معروضة بتوقيت مكة المكرمة</span><div class="settings-bar"><button class="btn btn-ghost" id="settings-update" style="font-size:.72rem;padding:5px 10px;border-color:var(--gold);color:var(--gold)">فحص التحديثات</button><button class="btn btn-ghost" id="settings-export" style="font-size:.72rem;padding:5px 10px">تصدير الإعدادات</button><button class="btn btn-ghost" id="settings-import-btn" style="font-size:.72rem;padding:5px 10px">استيراد الإعدادات</button><input type="file" id="settings-import" accept="application/json,.json" style="display:none"></div>
+  <footer><span>مواقيت احترافي - الإصدار 3.11 - جميع الأوقات معروضة بتوقيت مكة المكرمة</span><div class="settings-bar"><button class="btn btn-ghost" id="settings-update" style="font-size:.72rem;padding:5px 10px;border-color:var(--gold);color:var(--gold)">فحص التحديثات</button><button class="btn btn-ghost" id="settings-export" style="font-size:.72rem;padding:5px 10px">تصدير الإعدادات</button><button class="btn btn-ghost" id="settings-import-btn" style="font-size:.72rem;padding:5px 10px">استيراد الإعدادات</button><input type="file" id="settings-import" accept="application/json,.json" style="display:none"></div>
   </footer>
 </div>
 
@@ -2748,7 +2841,7 @@ const METHODS = [
   {id:'hanafi', name:'أم القرى (عصر حنفي)', fajr:18.5, isha:null, ishaMin:90, asr:2}
 ];
 
-let pMode = 'city', pCity = PRAYER_CITIES[6], pLat = 31.2001, pLon = 29.9187, pMethod = 'egypt', pAzan = true, pGeoLabel = '', pGeoIana = 'Africa/Cairo', pAutoTried = false, pStyle = 'timeline';
+let pMode = 'city', pCity = PRAYER_CITIES[6], pLat = 31.2001, pLon = 29.9187, pMethod = 'egypt', pAzan = true, pGeoLabel = '', pGeoIana = 'Africa/Cairo', pStyle = 'timeline', pLocTs = 0;
 const PRAYER_STYLES = [['hero','فخم'],['cards','بطاقات'],['timeline','خط زمني'],['compact','مبسّط']];
 function buildStyleChips(){
   const wrap = $('#prayer-styles');
@@ -2841,6 +2934,12 @@ function computePrayer(){
   const key = y + '-' + m + '-' + d;
   if (key === prayerDateKey && prayerTimes) return;
   prayerDateKey = key;
+  const cache = loadApiCache();
+  if (cache && cache.date === key && cache.lat === pLat.toFixed(3) && cache.lon === pLon.toFixed(3) && cache.method === pMethod && cache.times){
+    pApiState = {src: cache.src, ts: cache.ts || 0, error:false};
+    prayerTimes = Object.assign({}, cache.times);
+    return;
+  }
   const meth = METHODS.find(x => x.id === pMethod) || METHODS[0];
   prayerTimes = calcTimes(y, m, d, pLat, pLon, pOffsetHours(), meth);
 }
@@ -2875,7 +2974,19 @@ function pLabel(){
 function updateLocStatus(){
   const el = $('#prayer-loc-status');
   if (!el) return;
-  el.textContent = 'موقعك: ' + pLabel() + ' (' + pLat.toFixed(2) + '°، ' + pLon.toFixed(2) + '°)';
+  const userPicked = localStorage.getItem('moaqit_loc_user') === '1';
+  let txt;
+  if (pMode === 'city' && pCity){
+    txt = 'المواقيت محسوبة للمدينة المختارة: ' + pCity.city + ' (' + pCity.country + ')';
+    if (!userPicked && pCity.id === PRAYER_CITIES[6].id) txt += ' — اضغط "تحديد موقعي تلقائياً" لمواقيت مدينتك الدقيقة';
+  } else if (pMode === 'gps'){
+    txt = 'المواقيت محسوبة لموقعك بدقة وتتحدّث تلقائياً كلما تغيّر مكانك';
+    if (pGeoLabel) txt = pGeoLabel + ' — ' + txt;
+  } else {
+    txt = 'المواقيت محسوبة بالإحداثيات المدخلة';
+  }
+  if (pLocTs) txt += ' • آخر تحديد ' + agoText(pLocTs);
+  el.textContent = txt + ' • المصدر: ' + apiSourceText();
 }
 function reverseGeocode(lat, lon, fallbackLabel){
   fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + lat + '&longitude=' + lon + '&localityLanguage=ar')
@@ -2919,6 +3030,107 @@ function timeZoneForCoords(lat, lon, cb){
       .catch(() => { clearTimeout(t); finish(''); });
   } catch(e){ clearTimeout(t); finish(''); }
 }
+
+/* ==================== مواقيت الصلاة من الإنترنت (API + احتساب محلي احتياطي) ==================== */
+const API_METHOD_MAP = {ummalqura:4, egypt:5, mwl:3, isna:2, karachi:1, dubai:16, hanafi:4};
+let pApiLastFetch = 0, pApiState = {src:'', ts:0, error:false};
+function apiMethodNum(){ return API_METHOD_MAP[pMethod] || 3; }
+function loadApiCache(){
+  try { return JSON.parse(localStorage.getItem('moaqit_api_times') || 'null'); } catch(e){ return null; }
+}
+function apiCacheValid(){
+  const c = loadApiCache();
+  if (!c || !c.times) return false;
+  const {y, m, d} = localDateParts(new Date(), pTZ());
+  return c.date === (y + '-' + m + '-' + d) && c.lat === pLat.toFixed(3) && c.lon === pLon.toFixed(3) && c.method === pMethod;
+}
+function apiSourceText(){
+  if (pApiState.src) return pApiState.src + ' (إنترنت)';
+  return navigator.onLine ? 'الحساب المحلي الفلكي' : 'حساب محلي (بدون إنترنت)';
+}
+function syncPrayerTimesFromApi(quiet, force){
+  if (!navigator.onLine) return false;
+  const now = Date.now();
+  if (!force && now - pApiLastFetch < 45000) return false;
+  pApiLastFetch = now;
+  const {y, m, d} = localDateParts(new Date(), pTZ());
+  const date = y + '-' + m + '-' + d;
+  const school = pMethod === 'hanafi' ? 1 : 0;
+  const url = 'https://api.aladhan.com/v1/timings/' + date + '?latitude=' + pLat.toFixed(4) + '&longitude=' + pLon.toFixed(4) + '&method=' + apiMethodNum() + '&school=' + school;
+  fetch(url, {cache:'no-store'})
+    .then(r => r.json())
+    .then(dd => {
+      if (!dd || dd.code !== 200 || !dd.data || !dd.data.timings) throw new Error('bad');
+      const t = dd.data.timings;
+      const toMin = s => { const p = String(s).split(':').map(Number); return p[0]*60 + (p[1]||0); };
+      const times = {fajr: toMin(t.Fajr), sunrise: toMin(t.Sunrise), dhuhr: toMin(t.Dhuhr), asr: toMin(t.Asr), maghrib: toMin(t.Maghrib), isha: toMin(t.Isha), imsak: toMin(t.Imsak)};
+      const src = (dd.data.meta && dd.data.meta.method && dd.data.meta.method.name) || 'الأذان';
+      localStorage.setItem('moaqit_api_times', JSON.stringify({date, lat: pLat.toFixed(3), lon: pLon.toFixed(3), method: pMethod, times, src, ts: now}));
+      pApiState = {src, ts: now, error:false};
+      if (apiCacheValid()) prayerTimes = Object.assign({}, times);
+      renderPrayer(); updateLocStatus();
+      if (!quiet) toast('تم تحديث المواقيت من الإنترنت (' + src + ')');
+    })
+    .catch(() => {
+      pApiState.error = true;
+      const c = loadApiCache();
+      if (c && apiCacheValid()){ prayerTimes = Object.assign({}, c.times); renderPrayer(); }
+      if (!quiet) toast('تعذر تحديث المواقيت من الإنترنت — تم استخدام الحساب المحلي');
+    });
+  return true;
+}
+function agoText(ts){
+  const s = Math.floor(Math.max(0, Date.now() - ts) / 1000);
+  if (s < 60) return 'الآن';
+  const m = Math.floor(s / 60);
+  if (m < 60) return 'منذ ' + m + ' دقيقة';
+  const h = Math.floor(m / 60);
+  if (h < 24) return 'منذ ' + h + ' ساعة';
+  return 'منذ ' + Math.floor(h / 24) + ' يوم';
+}
+function nearestCityLabel(lat, lon){
+  let best = null, bd = 1e9;
+  PRAYER_CITIES.forEach(c => {
+    const d = haversineKm(lat, lon, c.lat, c.lon);
+    if (d < bd){ bd = d; best = c; }
+  });
+  return best && bd < 500 ? 'موقعك قرب ' + best.city + ' (' + best.country + ')' : '';
+}
+function locateViaGPS(done, failToast){
+  if (!navigator.geolocation){
+    ipLocate(done, () => { if (failToast) failToast('تعذر تحديد الموقع بدقة - اختر مدينتك من القائمة'); });
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = pos.coords.latitude, lon = pos.coords.longitude;
+      timeZoneForCoords(lat, lon, iana => done(lat, lon, 'تم تحديد موقعك بدقة', iana, ''));
+    },
+    err => {
+      const msg = err && err.code === 1 ? 'تم رفض إذن الموقع، جارٍ التحديد بالإنترنت...'
+        : err && err.code === 3 ? 'انتهت مهلة GPS، جارٍ التحديد بالإنترنت...'
+        : 'تعذر تحديد الموقع بدقة، جارٍ التحديد بالإنترنت...';
+      if (failToast) failToast(msg);
+      ipLocate(done, () => { if (failToast) failToast('تعذر تحديد الموقع - اختر مدينتك أو أدخل الإحداثيات'); });
+    },
+    {enableHighAccuracy: true, timeout: 12000, maximumAge: 0}
+  );
+}
+let lastAutoTry = 0;
+function autoLocate(quiet){
+  lastAutoTry = Date.now();
+  locateViaGPS(
+    (lat, lon, label, iana, cc) => applyGeo(lat, lon, label || 'تم تحديد موقعك تقريبياً', iana, cc),
+    quiet ? null : msg => toast(msg)
+  );
+}
+function needsRelocate(){
+  if (Date.now() - lastAutoTry < 3600000) return false;
+  if (localStorage.getItem('moaqit_loc_user') === '1') return false;
+  if (pMode === 'city' && pCity && pCity.id === PRAYER_CITIES[6].id) return true;
+  if ((pMode === 'gps' || pMode === 'manual') && pLocTs && Date.now() - pLocTs > 86400000) return true;
+  return false;
+}
 function renderPrayer(){
   computePrayer();
   const nowMin = prayerNowMin();
@@ -2939,7 +3151,7 @@ function renderPrayer(){
   });
   $('#prayer-next-name').textContent = nxt.name;
   $('#prayer-next-time').textContent = minToStr(nxt.time);
-  $('#prayer-loc-label').textContent = pLabel() + ' • ' + ((METHODS.find(x => x.id === pMethod) || {}).name || '') + ' • الإمساك ' + minToStr(prayerTimes.imsak);
+  $('#prayer-loc-label').textContent = pLabel() + ' • ' + ((METHODS.find(x => x.id === pMethod) || {}).name || '') + ' • الإمساك ' + minToStr(prayerTimes.imsak) + ' • ' + (pApiState.src ? 'إنترنت' : 'محلي');
   const prog = $('#prayer-progress');
   if (prog){
     let p0 = null, p1 = null;
@@ -3047,7 +3259,7 @@ function buildMethods(){
 function savePrayer(){
   localStorage.setItem('moaqit_prayer', JSON.stringify({
     mode: pMode, city: pCity ? pCity.id : 0, lat: pLat, lon: pLon, method: pMethod, azan: pAzan,
-    label: pGeoLabel || '', iana: pGeoIana || ''
+    label: pGeoLabel || '', iana: pGeoIana || '', ts: pLocTs
   }));
 }
 function loadPrayer(){
@@ -3058,6 +3270,7 @@ function loadPrayer(){
   if (typeof s.azan === 'boolean') pAzan = s.azan;
   if (typeof s.label === 'string') pGeoLabel = s.label;
   if (typeof s.iana === 'string') pGeoIana = validIana(s.iana);
+  if (typeof s.ts === 'number') pLocTs = s.ts;
   if (s.mode === 'city' && Number.isInteger(s.city) && PRAYER_CITIES[s.city]){
     pMode = 'city'; pCity = PRAYER_CITIES[s.city]; pLat = pCity.lat; pLon = pCity.lon;
   } else if ((s.mode === 'gps' || s.mode === 'manual') && isFinite(s.lat) && isFinite(s.lon)){
@@ -3068,6 +3281,8 @@ function loadPrayer(){
 const GPS_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>';
 function applyGeo(lat, lon, label, iana, cc){
   pMode = 'gps'; pLat = lat; pLon = lon; pGeoLabel = '';
+  pLocTs = Date.now();
+  localStorage.removeItem('moaqit_loc_user');
   const tz = validIana(iana); if (tz) pGeoIana = tz;
   methodForCountry(cc);
   const pl = $('#plat'), pn = $('#plon');
@@ -3075,14 +3290,8 @@ function applyGeo(lat, lon, label, iana, cc){
   if (pn) pn.value = lon.toFixed(4);
   const pc = $('#prayer-city'); if (pc) pc.value = '';
   savePrayer(); computePrayer(); renderPrayer(); updateLocStatus();
-  reverseGeocode(lat, lon, label);
-}
-function autoLocate(){
-  if (pAutoTried) return;
-  pAutoTried = true;
-  ipLocate(function(lat, lon, label, iana, cc){
-    applyGeo(lat, lon, label || 'تم تحديد موقعك تقريبياً', iana, cc);
-  }, function(){});
+  syncPrayerTimesFromApi(true, true);
+  reverseGeocode(lat, lon, label || nearestCityLabel(lat, lon));
 }
 function initPrayer(){
   const had = loadPrayer();
@@ -3100,50 +3309,55 @@ function initPrayer(){
   computePrayer();
   renderPrayer();
   updateLocStatus();
-  if (!had) autoLocate();
+  if (!had) autoLocate(true);
+  else if (needsRelocate()) autoLocate(true);
+  if (navigator.onLine) setTimeout(() => syncPrayerTimesFromApi(true, true), 900);
 }
 $('#prayer-city').addEventListener('change', e => {
   if (e.target.value === '') return;
   const c = PRAYER_CITIES[+e.target.value];
   pMode = 'city'; pCity = c; pLat = c.lat; pLon = c.lon;
+  pLocTs = Date.now(); localStorage.setItem('moaqit_loc_user', '1');
   pGeoIana = validIana(c.tz) || pGeoIana;
   methodForCountry(COUNTRY_CC[c.country] || '', true);
   savePrayer(); buildMethods(); computePrayer(); renderPrayer(); updateLocStatus();
+  syncPrayerTimesFromApi(true, true);
   toast('مواقيت الصلاة لـ ' + c.city);
 });
 $('#prayer-gps').addEventListener('click', () => {
   const btn = $('#prayer-gps');
   const reset = () => { btn.disabled = false; btn.style.opacity = ''; btn.innerHTML = GPS_ICON + ' تحديد موقعي تلقائياً'; };
+  lastAutoTry = 0;
   btn.disabled = true;
   btn.style.opacity = '.6';
   btn.textContent = 'جارٍ تحديد الموقع...';
   initAudio();
-  const done = (lat, lon, label, iana, cc) => {
-    applyGeo(lat, lon, label, iana, cc);
-    toast(label);
-    reset();
-  };
-  const gpsFail = err => {
-    const msg = err && err.code === 1 ? 'تم رفض إذن الموقع، جارٍ التحديد بالإنترنت...'
-      : err && err.code === 3 ? 'انتهت مهلة GPS، جارٍ التحديد بالإنترنت...'
-      : 'تعذر تحديد الموقع بدقة، جارٍ التحديد بالإنترنت...';
-    toast(msg);
-    ipLocate(done, () => {
-      toast('تعذر تحديد الموقع - اختر مدينتك من القائمة أو أدخل الإحداثيات يدوياً');
+  locateViaGPS(
+    (lat, lon, label, iana, cc) => {
+      applyGeo(lat, lon, label, iana, cc);
+      toast(label || 'تم تحديد موقعك');
       reset();
-    });
-  };
-  if (!navigator.geolocation){ gpsFail({code:2}); return; }
-  try {
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        const lat = pos.coords.latitude, lon = pos.coords.longitude;
-        timeZoneForCoords(lat, lon, iana => done(lat, lon, 'تم تحديد موقعك بدقة', iana, ''));
-      },
-      gpsFail,
-      {enableHighAccuracy: true, timeout: 12000, maximumAge: 0}
-    );
-  } catch(e){ gpsFail({code:2}); }
+    },
+    msg => { toast(msg); reset(); }
+  );
+});
+$('#prayer-relocate').addEventListener('click', () => {
+  const btn = $('#prayer-relocate');
+  const reset = () => { btn.disabled = false; btn.style.opacity = ''; btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg> إعادة التحديد'; };
+  lastAutoTry = 0;
+  btn.disabled = true; btn.style.opacity = '.6'; btn.textContent = 'جارٍ التحديد...';
+  locateViaGPS(
+    (lat, lon, label, iana, cc) => {
+      applyGeo(lat, lon, label, iana, cc);
+      toast(label || 'تم تحديث موقعك');
+      reset();
+    },
+    msg => { toast(msg); reset(); }
+  );
+});
+$('#prayer-city-filter').addEventListener('input', e => {
+  const q = e.target.value.trim();
+  $$('#prayer-city option').forEach(o => { o.style.display = (!q || o.textContent.indexOf(q) > -1) ? '' : 'none'; });
 });
 function ipLocate(done, fail){
   const providers = [
@@ -3175,10 +3389,12 @@ $('#prayer-apply').addEventListener('click', () => {
   const lat = +$('#plat').value, lon = +$('#plon').value;
   if (!isFinite(lat) || !isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180){ toast('أدخل إحداثيات صحيحة'); return; }
   pMode = 'manual'; pLat = lat; pLon = lon; pGeoLabel = '';
+  pLocTs = Date.now(); localStorage.setItem('moaqit_loc_user', '1');
   $('#prayer-city').value = '';
   timeZoneForCoords(lat, lon, iana => { if (iana) pGeoIana = iana; savePrayer(); computePrayer(); renderPrayer(); updateLocStatus(); });
   reverseGeocode(lat, lon, 'تم تطبيق الإحداثيات');
   savePrayer(); computePrayer(); renderPrayer();
+  syncPrayerTimesFromApi(true, true);
   toast('تم تطبيق الإحداثيات');
 });
 $('#prayer-methods').addEventListener('click', e => {
@@ -3187,6 +3403,7 @@ $('#prayer-methods').addEventListener('click', e => {
   pMethod = chip.dataset.m;
   localStorage.setItem('moaqit_method_user', '1');
   savePrayer(); buildMethods(); computePrayer(); renderPrayer();
+  syncPrayerTimesFromApi(true, true);
 });
 $('#prayer-styles').addEventListener('click', e => {
   const chip = e.target.closest('.chip');
@@ -3207,6 +3424,124 @@ $$('.tab').forEach(t => t.addEventListener('click', () => {
   $$('section').forEach(sec => sec.classList.toggle('active', sec.id === 'tab-' + t.dataset.tab));
   initAudio();
 }));
+
+/* ==================== Drawer (قائمة ☰ الموحّدة) ==================== */
+let drawerHomes = [], movedKids = [], drawerHeld = null;
+const DRAWER_TITLES = {clock:'الساعة', alarm:'المنبه', timer:'المؤقت', stopwatch:'ساعة الإيقاف', world:'توقيت العالم', prayer:'مواقيت الصلاة', qibla:'بوصلة القبلة', tasbih:'السبحة', quran:'المصحف الشريف'};
+const DRAWER_HINTS = {
+  prayer: 'المواقيت تُجلب تلقائياً من الإنترنت أول ما يفتح النت، ومع انقطاع الإنترنت يتحول الحساب المحلي الفلكي تلقائياً.',
+  clock: 'اختر مدينتك وسيتم حساب توقيتها والمنطقة الزمنية تلقائياً.',
+  alarm: 'اضبط مستوى الصوت والنغمات هنا، ويمكنك إضافة صوت من جهازك للتنبيهات.',
+  timer: 'اختر الشكل المناسب للمؤقت، مع وضع المذاكرة (٢٥ د مذاكرة / ٥ د راحة).',
+  stopwatch: 'اضغط ابدأ ثم لفة لتسجيل الأوقات. إعادة الضبط تمسح كل اللفات.',
+  world: 'ابحث عن أي مدينة وأضفها للمفضلة، وصفِّ حسب القارة من الأعلى.',
+  qibla: 'حدد موقعك لتعرف اتجاه القبلة وبُعدك عن الكعبة المشرفة من أي مكان في العالم.',
+  tasbih: 'اختر شكل السبحة والذكر والهدف (33 / 99 / بلا هدف) — والعدّ يُحفظ تلقائياً.',
+  quran: 'المصحف كامل يعمل بدون إنترنت. البحث، استكمال القراءة، وحجم الخط متاحان دائماً.'
+};
+function dsRow(label, val, ok){
+  return '<div class="ds-row"><span>' + label + '</span><b class="' + (ok ? 'ok' : 'warn') + '">' + val + '</b></div>';
+}
+function drawerStatus(sec){
+  const online = !!navigator.onLine;
+  const rows = [];
+  try {
+    if (sec === 'prayer'){
+      rows.push(dsRow('📍 الموقع', pLabel(), true));
+      rows.push(dsRow('🕌 مصدر المواقيت', apiSourceText(), online || pApiState.src !== ''));
+      rows.push(dsRow('🔔 منبه الأذان', pAzan ? 'مفعل' : 'متوقف', pAzan));
+      rows.push(dsRow('🕐 آخر تحديث', pApiState.ts ? agoText(pApiState.ts) : (pLocTs ? agoText(pLocTs) : '—'), true));
+    } else if (sec === 'clock'){
+      rows.push(dsRow('🌐 الإنترنت', online ? 'متصل — تحديث تلقائي' : 'وضع عدم الاتصال', online));
+      rows.push(dsRow('🕋 المدينة', ($('#info-city')||{}).textContent || 'مكة المكرمة', true));
+      rows.push(dsRow('⏱️ المنطقة الزمنية', ($('#info-tz')||{}).textContent || '—', true));
+      rows.push(dsRow('🔤 شكل الأرقام', (DIGIT_STYLES[dStyle]||{}).name || '—', true));
+    } else if (sec === 'alarm'){
+      const n = $$('#alarm-list .alarm-item').length;
+      rows.push(dsRow('🔔 المنبهات', ($('#alarm-count')||{}).textContent || '0', n > 0));
+      rows.push(dsRow('🔊 مستوى الصوت', ($('#vol-val')||{}).textContent || '—', true));
+      rows.push(dsRow('🎵 النغمات', $$('#sound-grid .sound-item').length + ' نغمة', true));
+    } else if (sec === 'timer'){
+      const sel = $$('#timer-styles .chip.sel')[0];
+      rows.push(dsRow('🎯 شكل المؤقت', sel ? sel.textContent : '—', true));
+      rows.push(dsRow('⏳ الحالة', ($('#timer-state')||{}).textContent || 'جاهز', true));
+      rows.push(dsRow('📚 وضع المذاكرة', $('#study-panel') ? 'مفعل ✓' : '—', true));
+    } else if (sec === 'stopwatch'){
+      rows.push(dsRow('⏱️ العرض', ($('#sw-display')||{}).textContent || '00:00.00', true));
+      rows.push(dsRow('🏁 اللفات المسجلة', $$('#sw-laps tr').length + ' لفة', true));
+      rows.push(dsRow('🎚️ الصوت', 'نغمة النظام', true));
+    } else if (sec === 'world'){
+      rows.push(dsRow('🌍 المدن المتاحة', (($('#world-grid')||{}).children || []).length + ' مدينة', true));
+      rows.push(dsRow('📌 مدنك المفضلة', (($('#pinned-grid')||{}).children || []).length + ' مدينة', true));
+      rows.push(dsRow('🗂️ الفلترة', 'بحث + تصنيف القارات', true));
+    } else if (sec === 'qibla'){
+      rows.push(dsRow('📍 الموقع', qiblaLat ? qiblaLat.toFixed(2) + '°، ' + qiblaLon.toFixed(2) + '°' : 'حدد موقعك أولاً', !!qiblaLat));
+      rows.push(dsRow('🧭 اتجاه القبلة', ($('#qibla-angle')||{}).textContent || '—', true));
+      rows.push(dsRow('📏 البعد عن الكعبة', ($('#qibla-dist')||{}).textContent || '—', true));
+    } else if (sec === 'tasbih'){
+      const sel = $('#tb-dhikr');
+      const txt = sel && sel.selectedOptions[0] ? sel.selectedOptions[0].textContent : 'سبحان الله';
+      rows.push(dsRow('📿 الذكر', txt, true));
+      rows.push(dsRow('🎯 الهدف', tb && tb.target ? tb.target + '×' : 'بلا هدف', true));
+      rows.push(dsRow('🔢 العدّ الحالي', tb ? (typeof arNum === 'function' ? arNum(tb.count) : String(tb.count)) : '0', true));
+    } else if (sec === 'quran'){
+      const reading = $('#quran-reader') && $('#quran-reader').style.display !== 'none';
+      rows.push(dsRow('📖 الحالة', reading ? 'جارٍ القراءة' : 'استعراض السور', true));
+      rows.push(dsRow('🔤 حجم الخط', quranFont() + ' بكسل', true));
+      rows.push(dsRow('🌐 المصدر', 'نص كامل بدون إنترنت ✓', true));
+    }
+  } catch(e){}
+  return rows.join('');
+}
+function openDrawer(sec){
+  if (document.body.classList.contains('drawer-open')) closeDrawer();
+  const body = $('#drawer-body');
+  const t = $('#drawer-title');
+  if (t) t.textContent = DRAWER_TITLES[sec] || 'الإعدادات';
+  body.innerHTML = '';
+  movedKids = [];
+  drawerHomes = Array.prototype.slice.call(document.querySelectorAll('[data-dv="' + sec + '"]'));
+  drawerHeld = document.createElement('div');
+  drawerHeld.className = 'drawer-held';
+  drawerHeld.innerHTML = '<div class="drawer-status">' + drawerStatus(sec) + '</div>' + (DRAWER_HINTS[sec] ? '<div class="drawer-hint">' + DRAWER_HINTS[sec] + '</div>' : '');
+  body.appendChild(drawerHeld);
+  drawerHomes.forEach((home, hi) => {
+    if (!home.children.length) return;
+    const g = document.createElement('div');
+    g.className = 'drawer-group-title';
+    g.textContent = hi === 0 ? 'الإعدادات' : 'أخرى';
+    body.appendChild(g);
+    while (home.firstChild){ const kid = home.firstChild; movedKids.push({el: kid, home: home}); body.appendChild(kid); }
+  });
+  if (sec === 'prayer' && navigator.onLine) syncPrayerTimesFromApi(true);
+  document.body.classList.add('drawer-open');
+  const d = $('#drawer');
+  if (d) d.setAttribute('aria-hidden', 'false');
+}
+function closeDrawer(){
+  document.body.classList.remove('drawer-open');
+  const body = $('#drawer-body');
+  if (!body) return;
+  if (drawerHeld && drawerHeld.parentNode === body) body.removeChild(drawerHeld);
+  drawerHeld = null;
+  movedKids.slice().reverse().forEach(k => { if (k.el.parentNode === body) k.home.appendChild(k.el); });
+  movedKids = [];
+  drawerHomes = [];
+  body.innerHTML = '';
+  const d = $('#drawer');
+  if (d) d.setAttribute('aria-hidden', 'true');
+}
+$$('.drawer-fab').forEach(b => b.addEventListener('click', () => openDrawer(b.dataset.sec)));
+const dClose = $('#drawer-close');
+if (dClose) dClose.addEventListener('click', closeDrawer);
+const dMask = $('#drawer-mask');
+if (dMask) dMask.addEventListener('click', closeDrawer);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+window.addEventListener('online', () => {
+  syncPrayerTimesFromApi(true, true);
+  updateLocStatus();
+  toast('تم الاتصال بالإنترنت — جاري تحديث المواقيت تلقائياً...');
+});
 function buildDigitsMenu(){
   const menu = $('#digits-menu');
   if (!menu) return;
@@ -3303,6 +3638,7 @@ setInterval(() => {
   computePrayer();
   if (oldKey !== prayerDateKey || lastRenderMin !== prayerNowMin()) renderPrayer();
   checkPrayerAzan();
+  if (navigator.onLine && !apiCacheValid()) syncPrayerTimesFromApi(true);
 }, 5000);
 
 /* ==================== مميزات جديدة: القبلة ==================== */
@@ -3493,7 +3829,7 @@ function checkPrayerNotifications(){
   } catch(e){}
 }
 /* ==================== التحديث الداخلي ==================== */
-const APP_INFO = { name: '3.10', code: 13, apk: 'https://github.com/amr12349said-boop/moaqit/releases/latest/download/mawaqit.apk' };
+const APP_INFO = { name: '3.11', code: 14, apk: 'https://github.com/amr12349said-boop/moaqit/releases/latest/download/mawaqit.apk' };
 const UPDATE_JSON_URL = 'https://amr12349said-boop.github.io/moaqit/version.json';
 const UPD_CHECK_INTERVAL = 86400000;
 let updateInfo = null;
